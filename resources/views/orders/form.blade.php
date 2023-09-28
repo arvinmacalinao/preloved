@@ -14,7 +14,7 @@
     @endif
     <!-- End -->
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
             <div class="card ">
                 <div class="card-header border-0">
                     <div class="row align-items-center">
@@ -22,7 +22,7 @@
                             <h3 class="mb-0">{{ $data['page'] }}</h3>
                         </div>
                         <div class="col-4 text-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('product.lists') }}" title="Back"><span class="fa fa-caret-left"></span> Back</a>
+                            <a class="btn btn-primary btn-sm" href="{{ route('order.lists') }}" title="Back"><span class="fa fa-caret-left"></span> Back</a>
                         </div>
                         <div class="border-bottom mt-0 mb-2"></div>
                     </div>
@@ -30,7 +30,7 @@
                 <div class="card-footer ">
                     <hr>
                     <div class="flex-grow-1">
-                        <form method="POST" action="{{ route('product.store', ['id' => $id]) }}">
+                        <form method="POST" action="{{ route('order.store', ['id' => $id]) }}">
                             @csrf
                             <div class="row">
                                 <div class="col-md-12">

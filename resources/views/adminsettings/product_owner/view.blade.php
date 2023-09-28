@@ -60,13 +60,25 @@
                                                 <td> {{ $ctr++ }} </td>
                                                 <td>{{ $row->prod_description }}</td>
                                                 <td>{{ $row->prod_price }}</td>
-                                                <td>{{ $row->prod_barcode }}</td>
+                                                @php 
+						                        $path1 = base_path('public/storage/generate/barcode/'.$row->barcode_image); 
+					                            @endphp
+                                                <td>
+                                                    @if(file_exists($path1))
+                                                    <a href="{{ Storage::url('generate/barcode/'.$row->barcode_image) }}" target="_blank" title="View">
+                                                        <img src="{{ Storage::url('generate/images/'.$row->prod_barcode."upca.png") }}" width="200px">
+                                                    </a>
+                                                    @else
+						                            	Image not found.
+						                            @endif
+                                                </td>
                                                 <td>{{ $row->prod_quantity }}</td>
                                                 <td>{{ $row->type->prod_type_name }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
                                                     <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_owner_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
                                                     <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_owner_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
+                                                    <a class="btn btn-info btn-sm row-edit-btn" href="{{ route('download.product.barcode', ['filename' => $row->barcode_image]) }}" title="Download"><i class="fa fa-download"></i></a>
                                                     <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_owner_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
                                                     </div>
                                                 </td>

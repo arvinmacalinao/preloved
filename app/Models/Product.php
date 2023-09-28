@@ -41,4 +41,11 @@ class Product extends Model
                 });
 		});
     }
+
+    public function barcode()
+    {
+        if(\Storage::disk('generate')->exists('barcode/'.$this->barcode_image)) {
+            return asset('generate/barcode/'.$this->barcode_image);
+        }
+    }
 }

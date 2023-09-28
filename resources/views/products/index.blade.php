@@ -17,7 +17,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card ">
-                    <div class="card-header border-0">
+                    <div class="card-header border-0 text-light" style="background-color:salmon;">
                         <div class="row align-items-center">
                             <div class="col-8">
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
@@ -72,15 +72,31 @@
                                     <td> {{ $ctr++ }} </td>
                                     <td>{{ $row->prod_description }}</td>
                                     <td>{{ $row->prod_price }}</td>
-                                    <td>{{ $row->prod_barcode }}</td>
+                                    @php 
+						            $path1 = base_path('public/storage/generate/barcode/'.$row->barcode_image); 
+					                @endphp
+                                    <td>
+                                        @if(file_exists($path1))
+                                        <a href="{{ Storage::url('generate/barcode/'.$row->barcode_image) }}" target="_blank" title="View">
+                                            <img src="{{ Storage::url('generate/images/'.$row->prod_barcode."upca.png") }}" width="200px">
+                                        </a>
+                                        @else
+						                	Image not found.
+						                @endif
+                                    </td>
                                     <td>{{ $row->prod_quantity }}</td>
                                     <td>{{ $row->type->prod_type_name }}</td>
-                                    <td>{{ $row->owner->prod_owner_name }}</td>
+                                    <td>
+                                        <a href="{{ route('product.owner.view', ['id' => $row->prod_owner_id]) }}" title="View">
+                                            {{ $row->owner->prod_owner_name }}
+                                        </a>
+                                    </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                        <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_owner_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
-                                        <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_owner_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
-                                        <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_owner_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
+                                        <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
+                                        <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
+                                        <a class="btn btn-info btn-sm row-edit-btn" href="{{ route('download.product.barcode', ['filename' => $row->barcode_image]) }}" title="Download"><i class="fa fa-download"></i></a>
+                                        <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
                                         </div>
                                     </td>
                                 </tr>

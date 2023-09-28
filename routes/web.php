@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductTypeController;
 use App\Http\Controllers\ProductOwnerController;
@@ -18,13 +19,15 @@ use App\Http\Controllers\ProductOwnerController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect('/dashboard');
+    } else {
+        return view('welcome');
+    }
 });
 
+
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-
-
 
 Auth::routes();
 
@@ -47,6 +50,18 @@ Route::get('product/{id}/view', [ProductController::class, 'view'])->name('produ
 Route::post('product/store/{id}', [ProductController::class, 'store'])->name('product.store');
 Route::get('product/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
 Route::get('product/delete/{id}', [ProductController::class, 'destroy'])->name('product.delete');
+Route::get('product/download_barcode/{filename}', [ProductController::class, 'download'])->name('download.product.barcode');
+
+/* Order */ 
+Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
+
+Route::get('order/create', [OrderController::class, 'create'])->name('order.create');
+
+Route::get('order/{id}/view', [OrderController::class, 'view'])->name('order.view');
+Route::post('order/store/{id}', [OrderController::class, 'store'])->name('order.store');
+Route::get('order/edit/{id}', [OrderController::class, 'edit'])->name('order.edit');
+Route::get('order/delete/{id}', [OrderController::class, 'destroy'])->name('order.delete');
+
 
 /* Product Type */ 
 Route::get('product-types', [ProductTypeController::class, 'index'])->name('product.type.lists');

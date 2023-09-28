@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use View;
+use Carbon\Carbon;
 use App\Models\Product;
+use Milon\Barcode\DNS1D;
 use App\Models\ProductType;
+use Illuminate\Support\Str;
 use App\Models\ProductOwner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProductValidation;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class ProductController extends Controller
 {
@@ -72,30 +77,166 @@ class ProductController extends Controller
         if($id == 0) {
             $min = 1000000000;
             $max = 9999999999; // Adjust the maximum value as needed
-                    
+                              
             // Generate a random number within the specified range
             $barcode = mt_rand($min, $max);
- 
-            $request['prod_barcode'] = $barcode;
             
-            $request->request->add(['created_by' => Auth::id()]);
-            $p     = Product::create($request->all());
-            $request->session()->put('session_msg', 'Record successfully added.');
-        } 
-        //     else {
-        //     $po     = ProductOwner::where('prod_owner_id', $id)->first();
-        //     if(!$po ) {
-        //         $request->session()->put('session_msg', 'Record not found!');
-        //         return redirect(route('product.owner.lists'));
-        //     }
-        //     $request->request->add([
-        //         'updated_at' => Carbon::now(), 
-        //         'updated_by' => Auth::id()
-        //     ]);
-        //     $po->update($request->all());
+            $price = $request->input('prod_price');
+            $description = $request->input('prod_description');
 
-        //     $request->session()->put('session_msg', 'Record updated.');
-        // }
+            // Generate the barcode image using milon/barcode
+            $barcodeGenerator = new DNS1D();
+            $barcodeGenerator->setStorPath(public_path('storage/generate/images')); // Set the storage path
+        
+            // Generate the barcode image
+            $barcodeImage = $barcodeGenerator->getBarcodePNGPath($barcode, 'UPCA',2,60, array(0,0,0), true);
+            
+            $imagePath = public_path('storage/generate/images/' . $barcode . "upca.png");
+
+            // Load the generated barcode image using Intervention Image
+            $barcodeImage = Image::make($imagePath);
+                
+            // Get the dimensions of the barcode image
+            $barcodeWidth = 280;
+            $barcodeHeight = 100;
+                
+            // Create a new canvas with a white background
+            $image = Image::canvas($barcodeWidth, $barcodeHeight, '#FFFFFF');
+                    
+            // Insert the barcode image at the custom position (bottom with margin)
+            $image->insert($barcodeImage, 'bottom', 0, 5);
+            
+            // Sample custom text lines
+            $line2 = 'Price: Php' . number_format($price, 2);
+            $line1 = 'Product: ' . $description;
+
+            // Define custom text settings
+            $customText = $line1 . "\n" . $line2; // Format the price with 2 decimal places
+            $fontPath = public_path('generate/font/ProximaNovaA-Thin.ttf');
+            $fontSize = 5;
+            $fontColor = '#000000'; // Black color
+
+            // Define the position to place the custom text
+            $xPosition = 10; // Adjust as needed
+            $yPosition = 15; // Adjust as needed
+            $yPosition2 = 25; // Adjust as needed
+
+            // Add custom text to the image with explicit line breaks
+            $image->text($line1, $xPosition, $yPosition, function($font) use ( $fontSize, $fontColor) {
+       
+                $font->size($fontSize);
+                $font->color($fontColor);
+            });
+
+            // Adjust the Y-coordinate for the second line
+            // Add some vertical spacing between lines (adjust as needed)
+
+            $image->text($line2, $xPosition, $yPosition2, function($font) use ( $fontSize, $fontColor) {
+          
+                $font->size($fontSize);
+                $font->color($fontColor);
+            });
+        
+            // Save the modified image
+            $generatedFilename = $barcode . '.png'; // Use the barcode value as the filename
+            $image->save(public_path('storage/generate/barcode/' . $generatedFilename));
+        
+            // Store the barcode value and filename in your database
+            $request['barcode_image'] = $generatedFilename;
+            $request['prod_barcode'] = $barcode;
+
+            $request->request->add(['created_by' => Auth::id()]);
+            $p = Product::create($request->all());
+            
+        } else {
+            $p          = Product::where('prod_id', $id)->first();
+            $barcode    = $p->prod_barcode;
+
+            $price = $request->input('prod_price');
+            $description = $request->input('prod_description');
+             
+            if(!$p ) {
+                $request->session()->put('session_msg', 'Record not found!');
+                return redirect(route('product.lists'));
+            }
+
+            $previousImagePath = public_path('storage/generate/images/' . $barcode . "upca.png");
+
+            $oldImageFilename = $p->barcode_image;
+
+            // Rename the existing image file by appending a timestamp (or some unique identifier)
+            $timestamp = now()->timestamp;
+            $renamedImageFilename = $timestamp . '_' . $oldImageFilename;
+            
+            // Get the path to the previous image
+            $previousBarcodePath = public_path('storage/generate/barcode/' . $oldImageFilename);
+            
+            // Rename the existing image file
+            if (file_exists($previousBarcodePath)) {
+                rename($previousBarcodePath, public_path('storage/generate/barcode/' . $renamedImageFilename));
+            }
+        
+            // ... (Your code for generating and saving the new image)
+            // Load the generated barcode image using Intervention Image
+            $barcodeImage = Image::make($previousImagePath);
+                
+            // Get the dimensions of the barcode image
+            $barcodeWidth = 280;
+            $barcodeHeight = 100;
+                
+            // Create a new canvas with a white background
+            $image = Image::canvas($barcodeWidth, $barcodeHeight, '#FFFFFF');
+                    
+            // Insert the barcode image at the custom position (bottom with margin)
+            $image->insert($barcodeImage, 'bottom', 0, 5);
+            
+            // Sample custom text lines
+            $line2 = 'Price: Php' . number_format($price, 2);
+            $line1 = 'Product: ' . $description;
+
+            // Define custom text settings
+            $customText = $line1 . "\n" . $line2; // Format the price with 2 decimal places
+            $fontPath = public_path('generate/font/ProximaNovaA-Thin.ttf');
+            $fontSize = 5;
+            $fontColor = '#000000'; // Black color
+
+            // Define the position to place the custom text
+            $xPosition = 10; // Adjust as needed
+            $yPosition = 15; // Adjust as needed
+            $yPosition2 = 25; // Adjust as needed
+
+            // Add custom text to the image with explicit line breaks
+            $image->text($line1, $xPosition, $yPosition, function($font) use ( $fontSize, $fontColor) {
+       
+                $font->size($fontSize);
+                $font->color($fontColor);
+            });
+
+            // Adjust the Y-coordinate for the second line
+            // Add some vertical spacing between lines (adjust as needed)
+
+            $image->text($line2, $xPosition, $yPosition2, function($font) use ( $fontSize, $fontColor) {
+          
+                $font->size($fontSize);
+                $font->color($fontColor);
+            });
+        
+            // Save the modified image
+            $generatedFilename = $barcode . '.png'; // Use the barcode value as the filename
+            $image->save(public_path('storage/generate/barcode/' . $generatedFilename));
+        
+            // Store the barcode value and filename in your database
+            $request['barcode_image'] = $generatedFilename;
+            $request['prod_barcode'] = $barcode;
+
+            $request->request->add([
+                'updated_at' => Carbon::now(), 
+                'updated_by' => Auth::id()
+            ]);
+            $p->update($request->all());
+
+            $request->session()->put('session_msg', 'Record updated.');
+        }
 
         return redirect(route('product.lists'));
     }
@@ -109,15 +250,15 @@ class ProductController extends Controller
     public function view(Request $request, $id)
     {
         $msg            = $request->session()->pull('session_msg', '');
-        $po             = ProductOwner::where('prod_owner_id', $id)->first();
-        if(!$po) {
+        $p              = Product::where('prod_id', $id)->first();
+        if(!$p) {
             $request->session()->put('session_msg', 'Record not found.');
-            return redirect(route('product.owner.lists'));
+            return redirect(route('product.lists'));
         }
 
-        $rows           = Product::where('prod_owner_id', $id)->paginate(20);
+        $rows           = Product::where('prod_id', $id)->paginate(20);
         
-        return view('adminsettings.product_owner.view', compact('id', 'msg', 'po', 'rows'));
+        return view('products.view', compact('id', 'msg', 'p', 'rows'));
     }
 
     /**
@@ -128,14 +269,18 @@ class ProductController extends Controller
      */
     public function edit(Request $request, $id)
     {
+        $types      =     ProductType::orderBy('prod_type_id', 'asc')->get();
+        $owners     =     ProductOwner::orderBy('prod_owner_id', 'asc')->get();
+
         $msg        = $request->session()->pull('session_msg', '');
-        $po         = ProductOwner::where('prod_owner_id', $id)->first();
-        if(!$po) {
+        
+        $p          = Product::where('prod_id', $id)->first();
+        if(!$p) {
             $request->session()->put('session_msg', 'Record not found!
             ');
-            return redirect(route('product.owner.lists'));
+            return redirect(route('product.lists'));
         }
-        return view('adminsettings.product_owner.form', compact('po', 'id', 'msg'));
+        return view('products.form', compact('p', 'id', 'msg', 'owners', 'types'));
     }
 
     /**
@@ -146,17 +291,26 @@ class ProductController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $po = ProductOwner::where('prod_owner_id', $id)->first();
-        if(!$po) {
+        $p   = Product::where('prod_id', $id)->first();
+        if(!$p) {
             $request->session()->put('session_msg', 'Record not found!');
-            return redirect(route('product.owner.lists'));
+            return redirect(route('product.lists'));
         } else {
-            $po->deleted_by = Auth::id();
-            $po->deleted_at = Carbon::now();
-            $po->update();
+            $p->deleted_by = Auth::id();
+            $p->deleted_at = Carbon::now();
+            $p->update();
 
             $request->session()->put('session_msg', 'Record deleted!');
-            return redirect(route('product.owner.lists'));
+            return redirect(route('product.lists'));
         }        
+    }
+
+    public function download($filename)
+    {
+        $filePath = 'generate/barcode/' . $filename;
+
+        if (Storage::disk('public')->exists($filePath)) {
+            return response()->download(storage_path('app/public/' . $filePath));
+        }
     }
 }

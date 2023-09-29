@@ -13,7 +13,7 @@ class CreateUsergroupTable extends Migration
      */
     public function up()
     {
-        Schema::create('usergroup', function (Blueprint $table) {
+        Schema::create('usergroups', function (Blueprint $table) {
             $table->bigIncrements('ug_id');
             $table->string('ug_name', 255);
             $table->timestamp('created_at');

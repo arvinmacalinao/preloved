@@ -10,6 +10,12 @@
                 </a>
             </li>
             <li class="{{ $elementActive == 'icons' ? 'active' : '' }}">
+                <a href="{{ route('order.lists') }}">
+                    <i class="fa fa-shopping-bag"></i>
+                    <p>{{ __('Orders') }}</p>
+                </a>
+            </li>
+            <li class="{{ $elementActive == 'icons' ? 'active' : '' }}">
                 <a href="{{ route('product.lists') }}">
                     <i class="nc-icon nc-diamond"></i>
                     <p>{{ __('Products') }}</p>
@@ -17,7 +23,7 @@
             </li>
             <li class="{{ $elementActive == 'user' || $elementActive == 'profile' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples">
-                    <i class="nc-icon"><img src="{{ asset('paper/img/laravel.svg') }}"></i>
+                    <i class="fa fa-user-circle-o"></i>
                     <p>
                             {{ __('User') }}
                         <b class="caret"></b>
@@ -42,7 +48,7 @@
             </li>
             <li class="{{ $elementActive == 'users' || $elementActive == 'profile' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples2">
-                    <i class="ti-user"><img src="{{ asset('paper/img/laravel.svg') }}"></i>
+                    <i class="fa fa-cogs"><img src=""></i>
                     <p>
                             {{ __('Admin Settings') }}
                         <b class="caret"></b>
@@ -54,6 +60,12 @@
                             <a href="{{ route('user.lists') }}">
                                 <span class="sidebar-mini-icon">{{ __('UP') }}</span>
                                 <span class="sidebar-normal">{{ __(' Users ') }}</span>
+                            </a>
+                        </li>
+                        <li class="{{ $elementActive == 'usergroup' ? 'active' : '' }}">
+                            <a href="{{ route('usergroup.lists') }}">
+                                <span class="sidebar-mini-icon">{{ __('UG') }}</span>
+                                <span class="sidebar-normal">{{ __(' User Group ') }}</span>
                             </a>
                         </li>
                         <li class="{{ $elementActive == 'product-type' ? 'active' : '' }}">

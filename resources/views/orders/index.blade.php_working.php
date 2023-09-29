@@ -24,16 +24,19 @@
                             </div>
                             <div class="col-4 text-right">
                                 {{-- {{ route('product.create') }} --}}
+                                <a href="" title="Add {{ $data['page'] }}" class="btn btn-sm btn-primary">Add {{ $data['page'] }}</a>
                             </div>
                         </div>
                         
                         <!-- Search engine section -->
                         <div class="mb-1 position-relative">
-                            <form class="row row-cols-lg-auto g-2 align-items-center">
+                            <form class="row row-cols-lg-auto g-2 align-items-center" method="POST" action="{{ url()->current() }}">
                                 @csrf
-                                <div class="col-md-12">
-                                    <input class="form-control " type="text" placeholder="Search" name="search" id="search" maxlength="255" value="">
-                                    <a href="#" class="btn btn-sm btn-success add_more pull-right"><i class="fa fa-plus-circle mr-2"></i> Add {{ $data['page'] }}</a>
+                                <div class="col-auto">
+                                    <input class="form-control" type="text" placeholder="Search" name="search" id="search" maxlength="255" value="{{ old('search', $search) }}">
+                                </div>
+                                <div class="col-auto">
+                                    <input class="btn btn-primary btn-sm" type="submit" name="search-btn" id="search-btn" value="Search">
                                 </div>
                             </form>
                         </div>
@@ -54,7 +57,7 @@
                                         <th scope="col" width="20%">Price</th>
                                         <th scope="col">Discount</th>
                                         <th scope="col">Total</th>
-                                        <th></th>
+                                        <th><a href="#" class="btn btn-sm btn-success add_more"><i class="fa fa-plus-circle"></i></a></th>
                                     </tr>
                                 </thead>
                                 <tbody class="addMoreProduct">

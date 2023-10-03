@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use View;
+use Exception;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderDetail;
@@ -10,6 +11,7 @@ use App\Models\ProductOwner;
 use Illuminate\Http\Request;
 use App\Models\OrderTransaction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
@@ -61,55 +63,56 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
     public function store(Request $request, $id)
     {
-        // return $request->all();
-
-
-        DB::transaction(function () use ($request){
-
-            //Order Modal
+        //  return $request->all();
+            
+            DB::transaction(function () use ($request){
+    
+            // Order Modal
             $orders = new Order;
             $orders->order_customer_name = $request->order_customer_name;
             $orders->order_customer_phone = $request->order_customer_phone;
             $orders->save();
-
-            //get order id
+    
+            // Get order id
             $order_id = $orders->order_id;
-
-            // 'order_id', 'prod_id', 'price', 'order_quantity', 'order_amount_total', 'order_discount'
-            //Order Details Modal
+    
+            // Order Details Modal
             $totalAmount = 0;
-
-            foreach ($request->prod_id as $i => $prodId) {
-                $order_detail = new OrderDetail;
-                $order_detail->order_id = $order_id;
-                $order_detail->prod_id = $prodId;
-                $order_detail->price = $request->price[$i];
-                $order_detail->order_quantity = $request->order_quantity[$i];
-                $order_detail->order_amount_total = $request->order_amount_total[$i];
-                $order_detail->order_discount = $request->order_discount[$i];
-                $order_detail->save(); // Save each order detail
-    
-                // Calculate total amount for this order detail
-                $totalAmount += $order_detail->order_amount_total;
-    
+            
+            if ($request->has('prod_id') && is_array($request->input('prod_id'))) {
+                foreach ($request->input('prod_id') as $i => $prodId) {
+                $orderDetail = new OrderDetail;
+                $orderDetail->order_id = $order_id;
+                $orderDetail->prod_id = $prodId;
+                $orderDetail->price = $request->input('prod_price')[$i];
+                $orderDetail->order_quantity = $request->input('order_quantity')[$i];
+                $orderDetail->order_amount_total = $request->input('order_amount_total')[$i];
+                $orderDetail->order_discount = $request->input('order_discount')[$i];
+                $orderDetail->save();
+            
                 // Update product quantity
-                $product = Product::find($prodId);
-                $newQuantity = $product->prod_quantity - $request->order_quantity[$i];
-    
-                // Check if the new quantity is valid
-                if ($newQuantity < 0) {
-                    // Handle the error, maybe by rolling back the transaction
-                    DB::rollBack();
-                    return redirect()->back()->with('error', 'Insufficient stock for product ' . $product->prod_description);
-                }
-    
-                $product->prod_quantity = $newQuantity;
-                $product->save();
+            $product = Product::find($prodId);
+            $newQuantity = $product->prod_quantity - $orderDetail->order_quantity;
+
+            // Calculate total amount for this order detail
+            $totalAmount += $orderDetail->order_amount_total;
+
+            if ($newQuantity < 0) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Insufficient stock for product ' . $product->prod_description);
             }
-            // 'order_id', 'ot_payment', 'ot_change', 'ot_total_amount', 'payment_mode_id', 'ot_transace_date', 'created_by'
-            //Transaction Modal
+
+            $product->prod_quantity = $newQuantity;
+            $product->save();
+                }
+            } else {
+                // Handle the case where the input data is missing or not an array.
+                // You can log an error, return an error response, or handle it as needed.
+            }
+
             $order_transaction                     = new OrderTransaction;
             $order_transaction->order_id           = $order_id;
             $order_transaction->created_by         = Auth::id();
@@ -130,6 +133,76 @@ class OrderController extends Controller
        
         return redirect(route('order.lists'));
     }
+
+    // public function store(Request $request, $id)
+    // {
+    //     return $request->all();
+
+
+    //     DB::transaction(function () use ($request){
+
+    //         //Order Modal
+    //         $orders = new Order;
+    //         $orders->order_customer_name = $request->order_customer_name;
+    //         $orders->order_customer_phone = $request->order_customer_phone;
+    //         $orders->save();
+
+    //         //get order id
+    //         $order_id = $orders->order_id;
+
+    //         // 'order_id', 'prod_id', 'price', 'order_quantity', 'order_amount_total', 'order_discount'
+    //         //Order Details Modal
+    //         $totalAmount = 0;
+
+    //         foreach ($request->prod_id as $i => $prodId) {
+    //             $order_detail = new OrderDetail;
+    //             $order_detail->order_id = $order_id;
+    //             $order_detail->prod_id = $prodId;
+    //             $order_detail->price = $request->price[$i];
+    //             $order_detail->order_quantity = $request->order_quantity[$i];
+    //             $order_detail->order_amount_total = $request->order_amount_total[$i];
+    //             $order_detail->order_discount = $request->order_discount[$i];
+    //             $order_detail->save(); // Save each order detail
+    
+    //             // Calculate total amount for this order detail
+    //             $totalAmount += $order_detail->order_amount_total;
+    
+    //             // Update product quantity
+    //             $product = Product::find($prodId);
+    //             $newQuantity = $product->prod_quantity - $request->order_quantity[$i];
+    
+    //             // Check if the new quantity is valid
+    //             if ($newQuantity < 0) {
+    //                 // Handle the error, maybe by rolling back the transaction
+    //                 DB::rollBack();
+    //                 return redirect()->back()->with('error', 'Insufficient stock for product ' . $product->prod_description);
+    //             }
+    
+    //             $product->prod_quantity = $newQuantity;
+    //             $product->save();
+    //         }
+    //         // 'order_id', 'ot_payment', 'ot_change', 'ot_total_amount', 'payment_mode_id', 'ot_transace_date', 'created_by'
+    //         //Transaction Modal
+    //         $order_transaction                     = new OrderTransaction;
+    //         $order_transaction->order_id           = $order_id;
+    //         $order_transaction->created_by         = Auth::id();
+    //         $order_transaction->ot_payment         = $request->ot_payment;
+    //         $order_transaction->ot_change          = $request->ot_change;
+    //         $order_transaction->ot_total_amount    = $totalAmount;
+    //         $order_transaction->ot_transact_date   = date('Y-m-d');
+    //         $order_transaction->payment_mode_id    = $request->payment_mode_id;
+    //         $order_transaction->save(); // Save each order detail
+
+    //          // Last Order History
+    //         $products = Product::all();
+    //         $order_details = OrderDetail::where('order_id', $order_id)->get();
+    //         $orderedby     = Order::where('order_id', $order_id)->get();
+
+    //         $request->session()->put('session_msg', 'Order successfuly saved.');
+    //     });
+       
+    //     return redirect(route('order.lists'));
+    // }
 
     /**
      * Display the specified resource.
@@ -175,4 +248,24 @@ class OrderController extends Controller
     {
         //
     }
+
+    public function getProductDetailsByBarcode(Request $request) {
+        try {
+        $barcode = $request->input('barcode');
+        
+        // Query the Product model to retrieve product details by barcode
+        $product = Product::where('prod_barcode', $barcode)->first();
+        
+        if ($product && $product->prod_quantity > 0) {
+            return response()->json(['success' => true, 'product' => $product]);
+        } else {
+            return response()->json(['success' => false, 'error' => 'Product not found or out of stock']);
+        }
+        
+    } catch (Exception $e) {
+        Log::error('Error in getProductDetailsByBarcode: ' . $e->getMessage());
+        return response()->json(['success' => false, 'error' => 'An error occurred.']);
+    }
+}
+
 }

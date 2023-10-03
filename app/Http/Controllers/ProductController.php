@@ -89,9 +89,9 @@ class ProductController extends Controller
             $barcodeGenerator->setStorPath(public_path('storage/generate/images')); // Set the storage path
         
             // Generate the barcode image
-            $barcodeImage = $barcodeGenerator->getBarcodePNGPath($barcode, 'UPCA',2,60, array(0,0,0), true);
+            $barcodeImage = $barcodeGenerator->getBarcodePNGPath($barcode, 'C128',2,60, array(0,0,0), true);
             
-            $imagePath = public_path('storage/generate/images/' . $barcode . "upca.png");
+            $imagePath = public_path('storage/generate/images/' . $barcode . "c128.png");
 
             // Load the generated barcode image using Intervention Image
             $barcodeImage = Image::make($imagePath);
@@ -160,7 +160,7 @@ class ProductController extends Controller
                 return redirect(route('product.lists'));
             }
 
-            $previousImagePath = public_path('storage/generate/images/' . $barcode . "upca.png");
+            $previousImagePath = public_path('storage/generate/images/' . $barcode . "c128.png");
 
             $oldImageFilename = $p->barcode_image;
 

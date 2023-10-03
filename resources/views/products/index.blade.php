@@ -78,7 +78,7 @@
                                     <td>
                                         @if(file_exists($path1))
                                         <a href="{{ Storage::url('generate/barcode/'.$row->barcode_image) }}" target="_blank" title="View">
-                                            <img src="{{ Storage::url('generate/images/'.$row->prod_barcode."upca.png") }}" width="200px">
+                                            <img src="{{ Storage::url('generate/images/'.$row->prod_barcode."c128.png") }}" width="200px">
                                         </a>
                                         @else
 						                	Image not found.

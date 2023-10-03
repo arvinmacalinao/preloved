@@ -42,6 +42,7 @@ Route::get('users/create', [UserController::class, 'create'])->name('new.user');
 Route::get('usergroups', [UsergroupController::class, 'index'])->name('usergroup.lists');
 Route::get('users/create', [UserController::class, 'create'])->name('new.user');
 
+
 	// Route::resource('users', 'App\Http\Controllers\UserController', ['except' => ['show']])->name('users');
 	Route::get('profile', ['as' => 'profile.edit', 'uses' => 'App\Http\Controllers\ProfileController@edit']);
 	Route::put('profile', ['as' => 'profile.update', 'uses' => 'App\Http\Controllers\ProfileController@update']);
@@ -58,7 +59,8 @@ Route::get('product/download_barcode/{filename}', [ProductController::class, 'do
 
 /* Order */ 
 Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
-Route::post('orders/store/', [OrderController::class, 'store'])->name('order.store');
+Route::post('orders/store/', [OrderController::class, 'store'])->name(' ');
+Route::get('/get-product-details-by-barcode', [OrderController::class, 'getProductDetailsByBarcode'])->name('get-product-details-by-barcode');
 
 Route::get('order/create', [OrderController::class, 'create'])->name('order.create');
 

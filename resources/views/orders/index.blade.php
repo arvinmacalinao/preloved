@@ -22,24 +22,21 @@
                             <div class="col-8">
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
                             </div>
-                            <div class="col-4 text-right">
-                                {{-- {{ route('product.create') }} --}}
-                            </div>
                         </div>
                         
                         <!-- Search engine section -->
                         <div class="mb-1 position-relative">
-                            <form class="row row-cols-lg-auto g-2 align-items-center">
+                            <form id="productForm" class="row row-cols-lg-auto g-2 align-items-center" method="POST" action="{{ route('order.store', ['id' => $id]) }}">
                                 @csrf
                                 <div class="col-md-12">
-                                    <input class="form-control " type="text" placeholder="Search" name="search" id="search" maxlength="255" value="">
-                                    <a href="#" class="btn btn-sm btn-success add_more pull-right"><i class="fa fa-plus-circle mr-2"></i> Add {{ $data['page'] }}</a>
+                                    <input class="form-control " type="text" placeholder="Enter barcode here" name="prodBarcode" id="prodBarcode" maxlength="255" value="">
+                                    <a href="#" id="addProductBtn" class="btn btn-sm btn-success pull-right"><i class="fa fa-plus-circle mr-2"></i> Add {{ $data['page'] }}</a>
                                 </div>
                             </form>
                         </div>
                         <!-- End of search engine section -->
                     </div>
-                    <form action="{{ route('order.store', ['id' => $id]) }}" method="POST">
+                    <form id="productForm" action="{{ route('order.store', ['id' => $id]) }}" method="POST">
                         @csrf
                     <div class="card-footer ">
                     <!-- End of pagination section -->
@@ -57,37 +54,9 @@
                                         <th></th>
                                     </tr>
                                 </thead>
-                                <tbody class="addMoreProduct">
+                                <tbody id="productList">
                                     <tr>
-                                        <td>1</td>
-                                        <td>
-                                            <select name="prod_id[]" id="prod_id" class="form-control prod_id">
-                                                <option value="">--Select Product--</option>
-                                                @foreach ($products as $product)
-                                                <option data-price="{{ $product->prod_price }}" data-max-quantity="{{ $product->prod_quantity }}" value="{{ $product->prod_id }}">{{ $product->prod_description }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <input type="number" value="1" min="1" name="order_quantity[]" id="order_quantity" 
-                                            class="form-control order_quantity">
-                                        </td>
-                                        <td>
-                                            <input type="number" name="price[]" id="price"  
-                                            class="form-control price">
-                                        </td>
-                                        <td>
-                                            <input type="number" value="0" min="0" name="order_discount[]" id="order_discount"  
-                                            class="form-control order_discount">
-                                        </td>
-                                        <td>
-                                            <input type="number" name="order_amount_total[]" id="order_amount_total" 
-                                            class="form-control order_amount_total">
-                                        </td>
-                                        <td>
-                                            <a href="#" class="btn btn-sm btn-danger delete">x</a>
-                                        </td>
+                                        
                                     </tr>
                                 </tbody>
                             </table>
@@ -105,7 +74,6 @@
                         </div>
                     </div>
                     <div class="card-body">
-                            @csrf
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-2">
@@ -163,6 +131,7 @@
                                         <input readonly class="form-control @error('ot_change') is-invalid @enderror" type="text" maxlength="255" name="ot_change" id="ot_change" value="">
                                         <div class="invalid-feedback">@error('ot_change') {{ $errors->first('ot_change') }} @enderror</div>
                                     </div>
+                                    <input class="ot_total_amount" type="hidden" name="ot_total_amount" id="ot_total_amount">
                                     <div class="mb-2 text-end">
                                         <input class="btn btn-primary btn-block" type="submit" name="form-submit" id="form-submit" value="Save">
                                     </div>
@@ -183,95 +152,172 @@
 @push('scripts')
     <script>
     $(document).ready(function () {
+        var addedRowsData = [];
+        var addedProductIds = [];
 
         $(".alert").delay(4000).slideUp(200, function() {
             $(this).alert('close');
         });
 
-        $('.add_more').on('click', function() {
-        var product = $('.prod_id').html();
-        var numberofrow = $('.addMoreProduct tr').length + 1; // Adjust the index
-
-        var tr = '<tr>' +
-            '<td class="no">' + numberofrow + '</td>' +
-            '<td><select class="form-control prod_id" name="prod_id[]">' + 
-                product + 
-            '</select></td>' +
-            '<td><input type="number" value="1" min="1" name="order_quantity[]" class="form-control order_quantity"></td>' +
-            '<td><input type="number" name="price[]" class="form-control price"></td>' +
-            '<td><input type="number" value="0" min="0" name="order_discount[]" class="form-control order_discount"></td>' +
-            '<td><input type="number" name="order_amount_total[]" class="form-control order_amount_total"></td>' +
-            '<td><a href="#" class="btn btn-sm btn-danger delete">x</a></td>' +
-            '</tr>';
-
-            $('.addMoreProduct').append(tr);
-            calculateTotal();
+        $('#productList').on('input', '.order_quantity, .order_discount', function () {
+        // Calculate amount_total for the current row
+        var row = $(this).closest('tr');
+        calculateAmountTotal(row);
         });
 
-        $('.addMoreProduct').delegate('.delete', 'click', function(){
-            $(this).parent().parent().remove();
-            calculateTotal();
+        // Calculate amount_total for each row on page load
+        $('table tbody tr').each(function () {
+            calculateAmountTotal($(this));
         });
 
+        var productCount = 0;
+
+        let buttonClicked = false; // Flag to track whether the button has been clicked
+
+        $('#productForm').on('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+            // Handle the form submission logic here
+        });
+
+        $('#prodBarcode').on('keyup', function (event) {
+            if (event.keyCode === 13) { // Check if Enter key is pressed (key code 13)
+                event.preventDefault(); // Prevent the default form submission
+                $('#addProductBtn').click(); // Trigger the button click event
+                
+                // Clear the input box
+                $('#prodBarcode').val('');
+            }
+        });
+        
+        var addedRowsData = []; // Array to store data for added rows
+
+        $('#addProductBtn').click(function() {
+            var barcode = $('#prodBarcode').val();
+
+            getProductDetailsByBarcode(barcode, function(productDetails) {
+                console.log(productDetails);
+
+                var productId = productDetails.prod_id;
+
+                // Check if the product has already been added
+                if (addedProductIds.includes(productId)) {
+                    alert('This product is already in the cart.');
+                    return;
+                }
+            
+                // Add the product to the cart
+                addedProductIds.push(productId);
+
+                if (productDetails) {
+                productCount++;
+                var newRow = `
+                <tr>
+                    <td>${productCount}</td>
+                    <td><input type="text" class="form-control prod_description" name="prod_description[]" value="${productDetails.prod_description}"></td>
+                    <td><input type="number" class="form-control order_quantity" name="order_quantity[]" value="1" min="1" data-max-quantity="${productDetails.prod_quantity}"></td>
+                    <td><input type="number" class="form-control prod_price" name="prod_price[]" value="${productDetails.prod_price}" readonly></td>
+                    <td><input type="number" class="form-control order_discount" name="order_discount[]" value="0" min="0" max="100"></td>
+                    <td><input type="number" class="total_amount form-control" name="order_amount_total[]" value="0.00" readonly></td>
+                    <td><button class="btn btn-danger removeProduct">Remove</button></td>
+                    <input type="hidden" class="prod_id" name="prod_id[]" value="${productDetails.prod_id}">
+                </tr>
+                `;
+
+                $('#productList').append(newRow);
+
+                // Bind calculation logic to input fields (except the newly added row)
+                $(document).on('input', '.order_quantity, .order_discount', calculateTotal);
+
+                // Remove product row
+                $('.removeProduct').click(function() {
+                    $(this).closest('tr').remove();
+                    calculateTotal();
+                });
+
+                // Clear input field
+                $('#barcodeInput').val('');
+                calculateTotal();
+                }
+            });
+        });
+
+        // Function to calculate total
         function calculateTotal() {
             var total = 0;
 
-            // Loop through each row in the table
-            $('.addMoreProduct tr').each(function () {
-                var quantity = parseFloat($(this).find('.order_quantity').val()) || 0;
-                var price = parseFloat($(this).find('.price').val()) || 0;
-                var discount = parseFloat($(this).find('.order_discount').val()) || 0;
+            $('.order_quantity').each(function() {
+                var quantity = parseFloat($(this).val()) || 0;
+                var price = parseFloat($(this).closest('tr').find('.prod_price').val()) || 0;
+                var discount = parseFloat($(this).closest('tr').find('.order_discount').val()) || 0;
 
-                var subtotal = (quantity * price) - ((quantity * price * discount) / 100);
+                // Get the maximum quantity allowed from the data attribute
+                var maxQuantity = parseFloat($(this).data('max-quantity')) || 0;
+
+                // Check if the quantity exceeds the maximum, and adjust it if necessary
+                if (quantity > maxQuantity) {
+                    quantity = maxQuantity;
+                    $(this).val(quantity); // Update the input field with the corrected value
+                }
+
+                var subtotal = quantity * price * (1 - discount / 100);
                 total += subtotal;
+
+                // Update the total_amount in the same row
+                var row = $(this).closest('tr');
+                var totalAmountInput = row.find('.total_amount');
+                totalAmountInput.val(subtotal.toFixed(2));
             });
 
-            // Display the total with two decimal places
             $('.total').text(total.toFixed(2));
+            $('.ot_total_amount').text(total.toFixed(2));
         }
 
-        // Attach an event listener to input fields to recalculate total on input
-        $('.addMoreProduct').on('input', 'input', calculateTotal);
+        // Function to calculate total
+        function calculateAmountTotal(row) {
+            var quantity = parseFloat(row.find('.order_quantity').val()) || 0;
+            var price = parseFloat(row.find('.prod_price').val()) || 0;
+            var discount = parseFloat(row.find('.order_discount').val()) || 0;
+                
+            var amountTotal = (quantity * price) - ((quantity * price * discount) / 100);
+                
+            // Update the total_amount <td> with the calculated value
+            row.find('.total_amount').text(amountTotal.toFixed(2));
+        }
+ 
+        // Function to retrieve product details by barcode (Replace this with your logic)
+        function getProductDetailsByBarcode(barcode, callback) {
+        // Make an AJAX request to fetch product details by barcode
+            $.ajax({
+                url: '/get-product-details-by-barcode', // Replace with your actual route URL
+                method: 'GET',
+                data: { barcode: barcode },
+                success: function(response) {
+                    if (response.success) {
+                        // Product details were successfully retrieved
+                        var productDetails = response.product;
+      
 
-        // Calculate the initial total when the page loads
-        calculateTotal();
-
-        // Bind the calculation logic to the 'change' event of relevant input fields
-        $('.addMoreProduct').delegate('.prod_id, .order_quantity, .order_discount', 'change', function(){
-            var tr = $(this).closest('tr'); // Find the closest row
-            var selectedOption = tr.find('.prod_id option:selected');
-
-            // Get the product price from the selected option's data attribute
-            var price = parseFloat(selectedOption.attr('data-price'));
-
-            // Set the product price in the 'price' input field
-            tr.find('.price').val(price);
-
-            // Get the quantity and discount values
-            var qty = parseFloat(tr.find('.order_quantity').val());
-            var disc = parseFloat(tr.find('.order_discount').val());
-
-            // Get the maximum quantity allowed from the selected option's data attribute
-            var maxQuantity = parseInt(selectedOption.attr('data-max-quantity'));
-
-            // Set the maximum quantity as the 'max' attribute of the 'order_quantity' input field
-            tr.find('.order_quantity').attr('max', maxQuantity);
-
-            // Calculate the total amount
-            var total_amount = (qty * price) - ((qty * price * disc) / 100);
-
-            // Set the calculated total amount in the 'order_amount_total' input field
-            tr.find('.order_amount_total').val(total_amount);
-
-            calculateTotal();560
-        });
-
+                        // Call the callback function and pass the product details
+                        if (typeof callback === 'function') {
+                            callback(productDetails);
+                        }
+                    } else {
+                        alert('Product not found');
+                        $('#barcodeInput').val('');
+                    }
+                },
+                error: function() {
+                    // Handle AJAX error here
+                    console.log('Error fetching product details');
+                }
+            });
+        }
         $('#ot_payment').keyup(function(){
             var total = $('.total').html();
             var payment = $(this).val();
             var tot     = payment - total;
             $('#ot_change').val(tot);
         });
-    });
+});
     </script>
 @endpush

@@ -266,7 +266,7 @@
             // Set the calculated total amount in the 'order_amount_total' input field
             tr.find('.order_amount_total').val(total_amount);
 
-            calculateTotal();560
+            calculateTotal();
         });
 
         $('#ot_payment').keyup(function(){

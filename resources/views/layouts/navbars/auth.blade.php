@@ -5,7 +5,7 @@
     <div class="sidebar-wrapper">
         <ul class="nav">
             <li class="{{ $elementActive == 'dashboard' ? 'active' : '' }}">
-                <a href="{{ route('page.index', 'dashboard') }}">
+                <a href="{{ route('dashboard', 'dashboard') }}">
                     <p>{{ __('Dashboard') }}</p>
                 </a>
             </li>
@@ -21,7 +21,7 @@
                     <p>{{ __('Products') }}</p>
                 </a>
             </li>
-            <li class="{{ $elementActive == 'user' || $elementActive == 'profile' ? 'active' : '' }}">
+            {{-- <li class="{{ $elementActive == 'user' || $elementActive == 'profile' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples">
                     <i class="fa fa-user-circle-o"></i>
                     <p>
@@ -45,7 +45,7 @@
                         </li>
                     </ul>
                 </div>
-            </li>
+            </li> --}}
             <li class="{{ $elementActive == 'users' || $elementActive == 'profile' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples2">
                     <i class="fa fa-cogs"><img src=""></i>

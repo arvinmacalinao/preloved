@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
@@ -20,20 +21,20 @@ use App\Http\Controllers\ProductOwnerController;
 
 Route::get('/', function () {
     if (Auth::check()) {
-        return redirect('/dashboard');
+        return route('dashboard');
     } else {
         return view('welcome');
     }
 });
 
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Auth::routes();
 
-Route::get('/home', 'App\Http\Controllers\HomeController@index')->name('home');
-
 Route::group(['middleware' => 'auth'], function () {
+
+Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::get('users', [UserController::class, 'index'])->name('user.lists');
 Route::get('users/create', [UserController::class, 'create'])->name('new.user');
@@ -43,10 +44,10 @@ Route::get('usergroups', [UsergroupController::class, 'index'])->name('usergroup
 Route::get('users/create', [UserController::class, 'create'])->name('new.user');
 
 
-	// Route::resource('users', 'App\Http\Controllers\UserController', ['except' => ['show']])->name('users');
-	Route::get('profile', ['as' => 'profile.edit', 'uses' => 'App\Http\Controllers\ProfileController@edit']);
-	Route::put('profile', ['as' => 'profile.update', 'uses' => 'App\Http\Controllers\ProfileController@update']);
-	Route::put('profile/password', ['as' => 'profile.password', 'uses' => 'App\Http\Controllers\ProfileController@password']);
+// Route::resource('users', 'App\Http\Controllers\UserController', ['except' => ['show']])->name('users');
+Route::get('profile', ['as' => 'profile.edit', 'uses' => 'App\Http\Controllers\ProfileController@edit']);
+Route::put('profile', ['as' => 'profile.update', 'uses' => 'App\Http\Controllers\ProfileController@update']);
+Route::put('profile/password', ['as' => 'profile.password', 'uses' => 'App\Http\Controllers\ProfileController@password']);
 
 /* Product */ 
 Route::any('products', [ProductController::class, 'index'])->name('product.lists');
@@ -59,15 +60,15 @@ Route::get('product/download_barcode/{filename}', [ProductController::class, 'do
 
 /* Order */ 
 Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
-Route::post('orders/store/', [OrderController::class, 'store'])->name(' ');
 Route::get('/get-product-details-by-barcode', [OrderController::class, 'getProductDetailsByBarcode'])->name('get-product-details-by-barcode');
+Route::get('/get-product-suggestions', [OrderController::class, 'getProductSuggestions'])->name('get-product-suggestions');
 
-Route::get('order/create', [OrderController::class, 'create'])->name('order.create');
+// Route::get('order/create', [OrderController::class, 'create'])->name('order.create');
 
-Route::get('order/{id}/view', [OrderController::class, 'view'])->name('order.view');
+// Route::get('order/{id}/view', [OrderController::class, 'view'])->name('order.view');
 Route::post('order/store/{id}', [OrderController::class, 'store'])->name('order.store');
-Route::get('order/edit/{id}', [OrderController::class, 'edit'])->name('order.edit');
-Route::get('order/delete/{id}', [OrderController::class, 'destroy'])->name('order.delete');
+// Route::get('order/edit/{id}', [OrderController::class, 'edit'])->name('order.edit');
+// Route::get('order/delete/{id}', [OrderController::class, 'destroy'])->name('order.delete');
 
 
 /* Product Type */ 
@@ -89,7 +90,7 @@ Route::get('product-owner/delete/{id}', [ProductOwnerController::class, 'destroy
 
 });
 
-Route::group(['middleware' => 'auth'], function () {
-	Route::get('{page}', ['as' => 'page.index', 'uses' => 'App\Http\Controllers\PageController@index']);
-});
+// Route::group(['middleware' => 'auth'], function () {
+// 	Route::get('{page}', ['as' => 'page.index', 'uses' => 'App\Http\Controllers\PageController@index']);
+// });
 

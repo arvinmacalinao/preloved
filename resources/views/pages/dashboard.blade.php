@@ -17,9 +17,8 @@
                             </div>
                             <div class="col-7 col-md-8">
                                 <div class="numbers">
-                                    <p class="card-category">SALES</p>
-                                    <p class="card-title">$ 1,345
-                                        <p>
+                                    <p class="card-category">Products Sold</p>
+                                    <p class="card-title">{{ $sales->sum('order_quantity') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -27,7 +26,7 @@
                     <div class="card-footer ">
                         <hr>
                         <div class="stats">
-                            <i class="fa fa-calendar-o"></i> Last day
+                            <i class="fa fa-calendar-o"></i> Updated
                         </div>
                     </div>
                 </div>
@@ -44,8 +43,7 @@
                             <div class="col-7 col-md-8">
                                 <div class="numbers">
                                     <p class="card-category">PRODUCTS</p>
-                                    <p class="card-title">23
-                                        <p>
+                                    <p class="card-title">{{ $products->sum('prod_quantity') }}</p>
                                 </div>
                             </div>
                         </div>

@@ -3,6 +3,33 @@
     'elementActive' => 'products'
 ])
 @section('content')
+<style>
+/* Add a custom CSS class to hide the sidebar */
+#prodBarcode {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 25px; /* Adjust the padding to make space for the arrow icon */
+    width: 100%;
+}
+
+/* Style for the select arrow icon */
+#prodBarcode::-ms-expand {
+    display: none;
+}
+        .sidebar {
+            display: none;
+        }
+
+        /* Adjust the main-panel and content styles when the sidebar is hidden */
+        .main-panel {
+            width: 100%; /* Fill the entire width when sidebar is hidden */
+        }
+
+        .main-panel .content {
+            margin-left: 0; /* Remove margin when sidebar is hidden */
+        }
+</style>
     <div class="content">
     <!-- This will display any message upon submission. -->
 		@if(strlen($msg) > 0)
@@ -13,9 +40,8 @@
             </button>
           </div>
     @endif
-    <!-- End -->
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-9">
                 <div class="card ">
                     <div class="card-header border-0 text-light" style="background-color:salmon;">
                         <div class="row align-items-center">
@@ -29,7 +55,7 @@
                             <form id="productForm" class="row row-cols-lg-auto g-2 align-items-center" method="POST" action="{{ route('order.store', ['id' => $id]) }}">
                                 @csrf
                                 <div class="col-md-12">
-                                    <input class="form-control " type="text" placeholder="Enter barcode here" name="prodBarcode" id="prodBarcode" maxlength="255" value="">
+                                    <input class="form-control" type="text" placeholder="Enter barcode here" name="prodBarcode" id="prodBarcode" maxlength="255" value="">
                                     <a href="#" id="addProductBtn" class="btn btn-sm btn-success pull-right"><i class="fa fa-plus-circle mr-2"></i> Add {{ $data['page'] }}</a>
                                 </div>
                             </form>
@@ -46,9 +72,9 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col" width="35%">Product</th>
+                                        <th scope="col" width="30%">Product</th>
                                         <th scope="col" width="10%">Qty</th>
-                                        <th scope="col" width="20%">Price</th>
+                                        <th scope="col" width="14%">Price</th>
                                         <th scope="col">Discount</th>
                                         <th scope="col">Total</th>
                                         <th></th>
@@ -64,7 +90,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card ">
                     <div class="card-header border-0 text-light" style="background-color:salmon;">
                         <div class="row align-items-center">
@@ -179,13 +205,15 @@
             // Handle the form submission logic here
         });
 
-        $('#prodBarcode').on('keyup', function (event) {
+        $('#prodBarcode').on('keyup', function(event) {
             if (event.keyCode === 13) { // Check if Enter key is pressed (key code 13)
                 event.preventDefault(); // Prevent the default form submission
                 $('#addProductBtn').click(); // Trigger the button click event
-                
                 // Clear the input box
                 $('#prodBarcode').val('');
+            } else {
+                var barcode = $(this).val();
+                fetchProductSuggestions(barcode);
             }
         });
         
@@ -195,16 +223,17 @@
             var barcode = $('#prodBarcode').val();
 
             getProductDetailsByBarcode(barcode, function(productDetails) {
-                console.log(productDetails);
 
                 var productId = productDetails.prod_id;
 
                 // Check if the product has already been added
                 if (addedProductIds.includes(productId)) {
-                    alert('This product is already in the cart.');
-                    return;
-                }
-            
+                    var index = addedProductIds.indexOf(productId);
+                    addedProductIds.splice(index, 1);
+
+                    alert('This product already in the cart.');
+                } else {
+                    
                 // Add the product to the cart
                 addedProductIds.push(productId);
 
@@ -235,8 +264,9 @@
                 });
 
                 // Clear input field
-                $('#barcodeInput').val('');
+                $('#prodBarcode').val('');
                 calculateTotal();
+                }
                 }
             });
         });
@@ -283,6 +313,13 @@
             // Update the total_amount <td> with the calculated value
             row.find('.total_amount').text(amountTotal.toFixed(2));
         }
+
+        $('#ot_payment').keyup(function(){
+            var total = $('.total').html();
+            var payment = $(this).val();
+            var tot     = payment - total;
+            $('#ot_change').val(tot);
+        });
  
         // Function to retrieve product details by barcode (Replace this with your logic)
         function getProductDetailsByBarcode(barcode, callback) {
@@ -303,7 +340,7 @@
                         }
                     } else {
                         alert('Product not found');
-                        $('#barcodeInput').val('');
+                        $('#prodBarcode').val('');
                     }
                 },
                 error: function() {
@@ -312,12 +349,51 @@
                 }
             });
         }
-        $('#ot_payment').keyup(function(){
-            var total = $('.total').html();
-            var payment = $(this).val();
-            var tot     = payment - total;
-            $('#ot_change').val(tot);
+        
+        function fetchProductSuggestions(barcode) {
+            $.ajax({
+                url: '/get-product-suggestions', // Replace with your route URL
+                method: 'GET',
+                data: { barcode: barcode },
+                success: function(response) {
+                // console.log(response)
+                    
+                },
+                error: function() {
+                    // Handle AJAX error here
+                    console.log('Error fetching product suggestions');
+                }
+            });
+        }
+
+        $( "#prodBarcode" ).autocomplete({
+          source: function(request, response) {
+              $.ajax({
+              url: siteUrl + '/' +"get-product-suggestions",
+              data: {
+                      term : request.term
+               },
+              dataType: "json",
+              success: function(data){
+                console.log(data)
+                 var resp = $.map(data,function(obj){
+                      return obj.name;
+                 }); 
+             
+                 response(resp);
+              }
+          });
+        },
+        minLength: 2
         });
 });
+
+// $(document).on('click', function(event) {
+//     var target = $(event.target);
+    
+//     if (!target.is('#prodBarcode') && !target.is('#productSuggestions')) {
+//         $('#productSuggestions').remove();
+//     }
+// });
     </script>
 @endpush

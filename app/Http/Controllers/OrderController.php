@@ -251,21 +251,34 @@ class OrderController extends Controller
 
     public function getProductDetailsByBarcode(Request $request) {
         try {
-        $barcode = $request->input('barcode');
+            $barcode = $request->input('barcode');
+            
+            // Query the Product model to retrieve product details by barcode
+            $product = Product::where('prod_barcode', $barcode)->first();
+            
+            if ($product && $product->prod_quantity > 0) {
+                return response()->json(['success' => true, 'product' => $product]);
+            } else {
+                return response()->json(['success' => false, 'error' => 'Product not found or out of stock']);
+            }
         
-        // Query the Product model to retrieve product details by barcode
-        $product = Product::where('prod_barcode', $barcode)->first();
-        
-        if ($product && $product->prod_quantity > 0) {
-            return response()->json(['success' => true, 'product' => $product]);
-        } else {
-            return response()->json(['success' => false, 'error' => 'Product not found or out of stock']);
+        } catch (Exception $e) {
+            Log::error('Error in getProductDetailsByBarcode: ' . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'An error occurred.']);
         }
-        
-    } catch (Exception $e) {
-        Log::error('Error in getProductDetailsByBarcode: ' . $e->getMessage());
-        return response()->json(['success' => false, 'error' => 'An error occurred.']);
     }
-}
+
+    public function getProductSuggestions(Request $request)
+    {
+        $query = $request->input('barcode'); // Get the user's input query
+    
+        // Use the query to fetch product suggestions (e.g., from your database)
+        $suggestions = Product::where('prod_barcode', 'like', $query . '%')
+            ->orWhere('prod_description', 'like', '%' . $query . '%')
+            ->limit(10) // Limit the number of suggestions
+            ->get();
+    
+        return response()->json(['suggestions' => $suggestions]);
+    }
 
 }

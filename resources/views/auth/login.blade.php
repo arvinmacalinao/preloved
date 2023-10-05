@@ -7,7 +7,7 @@
     <div class="content">
         <div class="container">
             <div class="col-lg-4 col-md-6 ml-auto mr-auto">
-                <form class="form" method="POST" action="{{ route('login') }}">
+                <form class="form" method="POST" action="{{ route('users.login') }}">
                     @csrf
                     <div class="card card-login">
                         <div class="card-header ">
@@ -15,6 +15,9 @@
                                 <h3 class="header text-center">{{ __('Login') }}</h3>
                             </div>
                         </div>
+                        @if(strlen($msg) > 0)
+		<div class="text-danger p-2 fs-5 fw-bold"> {{ $msg }} </div>
+		@endif
                         <div class="card-body ">
 
                             <div class="input-group">
@@ -23,11 +26,11 @@
                                         <i class="nc-icon nc-single-02"></i>
                                     </span>
                                 </div>
-                                <input class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" placeholder="{{ __('Email') }}" type="email" name="email" value="{{ old('email') }}" required autofocus>
+                                <input class="form-control{{ $errors->has('u_email') ? ' is-invalid' : '' }}" type="text" placeholder="Username" name="username" id="username" maxlength="255" required="required" value="{{ old('username') }}" autofocus>
                                 
-                                @if ($errors->has('email'))
+                                @if ($errors->has('u_email'))
                                     <span class="invalid-feedback" style="display: block;" role="alert">
-                                        <strong>{{ $errors->first('email') }}</strong>
+                                        <strong>{{ $errors->first('u_email') }}</strong>
                                     </span>
                                 @endif
                             </div>
@@ -38,7 +41,7 @@
                                         <i class="nc-icon nc-single-02"></i>
                                     </span>
                                 </div>
-                                <input class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" placeholder="{{ __('Password') }}" type="password" required>
+                                <input class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" type="password" placeholder="Password" name="password" id="password" maxlength="255" required="required">
                                 
                                 @if ($errors->has('password'))
                                     <span class="invalid-feedback" style="display: block;" role="alert">

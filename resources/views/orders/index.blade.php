@@ -356,7 +356,7 @@
                 method: 'GET',
                 data: { barcode: barcode },
                 success: function(response) {
-                // console.log(response)
+                 console.log(response)
                     
                 },
                 error: function() {

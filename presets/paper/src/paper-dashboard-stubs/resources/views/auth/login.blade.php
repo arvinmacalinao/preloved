@@ -7,7 +7,7 @@
     <div class="content">
         <div class="container">
             <div class="col-lg-4 col-md-6 ml-auto mr-auto">
-                <form class="form" method="POST" action="{{ route('login') }}">
+                <form class="form" method="POST" action="{{ route('users.login') }}">
                     @csrf
                     <div class="card card-login">
                         <div class="card-header ">

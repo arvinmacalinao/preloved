@@ -5,13 +5,12 @@
 
 @section('content')
 <div class="content">   
-    <!-- This will display any message upon submission. -->
 		@if(strlen($msg) > 0)
         <div class="alert alert-info alert-dismissible fade show" role="alert">
             <button type="button" class="btn-close pull-right" data-bs-dismiss="alert" aria-label="Close">x</button>
             {{ $msg }}
         </div>
-    @endif
+         @endif
     <!-- End -->
     <div class="row">
         <div class="col-md-12">

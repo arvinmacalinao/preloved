@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use View;
+use Carbon\Carbon;
 use App\Models\UserGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\UserGroupValidation;
 
 class UsergroupController extends Controller
 {   
@@ -31,9 +33,11 @@ class UsergroupController extends Controller
      */
     public function index(Request $request)
     {
-        $rows   =   UserGroup::get();
+        $msg        = $request->session()->pull('session_msg', '');
 
-        return view('adminsettings.usergroups.index', compact('rows'));
+        $rows       = UserGroup::paginate(20);
+       
+        return view('adminsettings.usergroups.index', compact('rows', 'msg'));
     }
 
     /**
@@ -41,9 +45,13 @@ class UsergroupController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $msg        = $request->session()->pull('session_msg', '');
+
+        $id      =      0;
+        $ug      =      new UserGroup;
+        return view('adminsettings.usergroups.form', compact('ug', 'id', 'msg'));
     }
 
     /**
@@ -52,43 +60,45 @@ class UsergroupController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UserGroupValidation $request, $id)
     {
-        //
+        $input      = $request->validated();
+        if($id == 0) {
+            $request->request->add(['created_at' => Carbon::now()]);
+            $ug   = UserGroup::create($request->all());
+        } else {
+            $ug   = UserGroup::where('ug_id', $id)->first();
+            if(!$ug) {
+                $request->session()->put('session_msg', 'Record not found!');
+                return redirect(route('usergroups.list'));
+            } else {
+                $request->request->add(['updated_at' => Carbon::now()]);
+                
+                $checkboxFields = ['ug_is_admin'];
+
+                foreach ($checkboxFields as $field) {
+                    $value = $request->has($field) ? 1 : 0;
+                    $ug->$field = $value;
+                }
+       
+                $ug->update($request->all());
+            }
+        }
+
+        $request->session()->put('session_msg', 'Record updated.');
+        return redirect(route('usergroups.list'));
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function edit(Request $request, $id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
+        $msg        = $request->session()->pull('session_msg', '');
+        
+        $ug       = UserGroup::where('ug_id', $id)->first();
+        if(!$ug) {
+            $request->session()->put('session_msg', 'Record not found!');
+            return redirect(route('usergroups.list'));
+        }
+        return view('adminsettings.usergroups.form', compact('msg', 'id', 'ug'));
     }
 
     /**
@@ -97,8 +107,16 @@ class UsergroupController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete(Request $request, $id)
     {
-        //
+        $ug = UserGroup::where('ug_id', $id)->first();
+        if(!$ug) {
+            $request->session()->put('session_msg', 'Record not found!');
+            return redirect(route('usergroups.list'));
+        } else {
+            $ug->delete();
+            $request->session()->put('session_msg', 'Record deleted!');
+            return redirect(route('usergroups.list'));
+        } 
     }
 }

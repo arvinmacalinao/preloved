@@ -5,6 +5,9 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UsergroupController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProductTypeController;
 use App\Http\Controllers\ProductOwnerController;
 
@@ -19,29 +22,44 @@ use App\Http\Controllers\ProductOwnerController;
 |
 */
 
-Route::get('/', function () {
-    if (Auth::check()) {
-        return route('dashboard');
-    } else {
-        return view('welcome');
-    }
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::middleware(['guest'])->group(function() {
+    /************************ START OF AUTHENTICATION ROUTES ************************/
+    /* Login and Logout Routes */
+    Route::get('login', [LoginController::class, 'loginform'])->name('users.loginform');
+    Route::post('loginuser', [LoginController::class, 'login'])->name('users.login');
+
+    /************************ END OF AUTHENTICATION ROUTES ************************/
 });
 
 
 
-Auth::routes();
-
 Route::group(['middleware' => 'auth'], function () {
 
-Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::any('logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/home', [DashboardController::class, 'index'])->name('home');
+
+/* Users */
 Route::get('users', [UserController::class, 'index'])->name('user.lists');
-Route::get('users/create', [UserController::class, 'create'])->name('new.user');
+Route::get('user/create', [UserController::class, 'create'])->name('new.user');
+Route::post('user/store/{id}', [UserController::class, 'store'])->name('store.user');
+Route::get('user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
+Route::get('user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
+Route::get('user/disable/{id}', [UserController::class, 'disable'])->name('user.disable');
+Route::get('user/enable/{id}', [UserController::class, 'enable'])->name('user.enable');
 
 /* UserGroup*/
-Route::get('usergroups', [UsergroupController::class, 'index'])->name('usergroup.lists');
-Route::get('users/create', [UserController::class, 'create'])->name('new.user');
+Route::get('usergroups', [UsergroupController::class, 'index'])->name('usergroups.list');
+Route::get('usergroup/create', [UsergroupController::class, 'create'])->name('usergroup.create');
+Route::post('usergroup/store/{id}', [UsergroupController::class, 'store'])->name('usergroup.store');
+Route::get('usergroup/edit/{id}', [UsergroupController::class, 'edit'])->name('usergroup.edit');
+Route::get('usergroup/delete/{id}', [UsergroupController::class, 'delete'])->name('usergroup.delete');
+// Route::get('usergroup/disable/{id}', [UsergroupController::class, 'disable'])->name('user.disable');
+// Route::get('usergroup/enable/{id}', [UsergroupController::class, 'enable'])->name('user.enable');
+
 
 
 // Route::resource('users', 'App\Http\Controllers\UserController', ['except' => ['show']])->name('users');
@@ -63,13 +81,8 @@ Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
 Route::get('/get-product-details-by-barcode', [OrderController::class, 'getProductDetailsByBarcode'])->name('get-product-details-by-barcode');
 Route::get('/get-product-suggestions', [OrderController::class, 'getProductSuggestions'])->name('get-product-suggestions');
 
-// Route::get('order/create', [OrderController::class, 'create'])->name('order.create');
-
-// Route::get('order/{id}/view', [OrderController::class, 'view'])->name('order.view');
-Route::post('order/store/{id}', [OrderController::class, 'store'])->name('order.store');
-// Route::get('order/edit/{id}', [OrderController::class, 'edit'])->name('order.edit');
-// Route::get('order/delete/{id}', [OrderController::class, 'destroy'])->name('order.delete');
-
+/* Sales */ 
+Route::any('sales', [SalesController::class, 'index'])->name('sales.list');
 
 /* Product Type */ 
 Route::get('product-types', [ProductTypeController::class, 'index'])->name('product.type.lists');

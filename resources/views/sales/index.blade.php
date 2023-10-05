@@ -1,6 +1,6 @@
 @extends('layouts.app', [
     'class' => '',
-    'elementActive' => 'user-group'
+    'elementActive' => 'sales'
 ])
 @section('content')
     <div class="content">
@@ -11,25 +11,24 @@
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-        </div>
-        @endif
+          </div>
+    @endif
     <!-- End -->
         <div class="row">
             <div class="col-md-12">
                 <div class="card ">
-                    <div class="card-header border-0">
+                    <div class="card-header border-0 text-light" style="background-color:salmon;">
                         <div class="row align-items-center">
                             <div class="col-8">
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
                             </div>
-                            <div class="col-4 text-right">
-                                <a href="{{ route('usergroup.create') }}" title="Add {{ $data['page'] }}" class="btn btn-sm btn-primary">Add {{ $data['page'] }}</a>
-                            </div>
+                            {{-- <div class="col-4 text-right">
+                                <a href="{{ route('product.create') }}" title="Add {{ $data['page'] }}" class="btn btn-sm btn-primary">Add {{ $data['page'] }}</a>
+                            </div> --}}
                         </div>
                         
                         <!-- Search engine section -->
-                        {{-- <div class="mb-1 position-relative">
-                            <form class="row row-cols-lg-auto g-2 align-items-center" method="" action="{{ url()->current() }}">
+                        <div class="mb-1 position-relative">
                             <form class="row row-cols-lg-auto g-2 align-items-center" method="POST" action="{{ url()->current() }}">
                                 @csrf
                                 <div class="col-auto">
@@ -39,7 +38,7 @@
                                     <input class="btn btn-primary btn-sm" type="submit" name="search-btn" id="search-btn" value="Search">
                                 </div>
                             </form>
-                        </div> --}}
+                        </div>
                         <!-- End of search engine section -->
                     </div>
                     <div class="card-footer ">
@@ -55,10 +54,12 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th class="text-center text-nowrap">User Group</th>
-                                        <th class="text-center text-nowrap">Display Name</th>
-                                        <th class="text-center text-nowrap">Is Admin</th>
-						                <th class="text-center text-nowrap">Display Name</th>
+                                        <th scope="col" width="20%">Description</th>
+                                        <th scope="col" width="20%">Price</th>
+                                        <th scope="col" width="20%">Barcode/Serial No.</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Owner</th>
                                         <th scope="col"></th>
                                     </tr>
                                 </thead>
@@ -69,21 +70,33 @@
                                 @foreach ($rows as $row)
                                 <tr>
                                     <td> {{ $ctr++ }} </td>
-                                    <td>{{ $row->ug_name }}</td>
-                                    <td>{{ $row->ug_display_name }}</td>
+                                    <td>{{ $row->prod_description }}</td>
+                                    <td>{{ $row->prod_price }}</td>
+                                    @php 
+						            $path1 = base_path('public/storage/generate/barcode/'.$row->barcode_image); 
+					                @endphp
                                     <td>
-                                        @if ($row->ug_is_admin == 1)
-                                            Yes
+                                        @if(file_exists($path1))
+                                        <a href="{{ Storage::url('generate/barcode/'.$row->barcode_image) }}" target="_blank" title="View">
+                                            <img src="{{ Storage::url('generate/images/'.$row->prod_barcode."c128.png") }}" width="200px">
+                                        </a>
                                         @else
-                                            No
-                                        @endif
+						                	Image not found.
+						                @endif
                                     </td>
-                                    <td>{{ $row->created_at }}</td>
+                                    <td>{{ $row->prod_quantity }}</td>
+                                    <td>{{ $row->type->prod_type_name }}</td>
+                                    <td>
+                                        <a href="{{ route('product.owner.view', ['id' => $row->prod_owner_id]) }}" title="View">
+                                            {{ $row->owner->prod_owner_name }}
+                                        </a>
+                                    </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                        {{-- <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.type.view', ['id' => $row->ug_id]) }}" title="View"><i class="fa fa-folder-open"></i></a> --}}
-                                        <a class="btn btn-info btn-sm row-edit-btn" href="{{ route('usergroup.edit', ['id' => $row->ug_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
-                                        <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('usergroup.delete', ['id' => $row->ug_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
+                                        <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
+                                        <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
+                                        <a class="btn btn-info btn-sm row-edit-btn" href="{{ route('download.product.barcode', ['filename' => $row->barcode_image]) }}" title="Download"><i class="fa fa-download"></i></a>
+                                        <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
                                         </div>
                                     </td>
                                 </tr>
@@ -103,9 +116,6 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function () {
-        setup_grid_delete_btns();
-        });
         $(".alert").delay(4000).slideUp(200, function() {
             $(this).alert('close');
         });

@@ -24,9 +24,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $products = Product::all(); // Fetch your products data (adjust the query as needed)
-        $sales    = OrderDetail::all();
-
-        return view('pages.dashboard', [ 'products' => $products, 'sales' => $sales ]);
+        return view('welcome');
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ModifyUsergroupsTable extends Migration
+class CreateUsergroupTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,14 @@ class ModifyUsergroupsTable extends Migration
      */
     public function up()
     {
-        Schema::table('usergroups', function (Blueprint $table) {
+        Schema::create('usergroups', function (Blueprint $table) {
+            $table->bigIncrements('ug_id');
+            $table->string('ug_name', 255);
             $table->tinyInteger('ug_is_admin')->default(0);
             $table->string('ug_display_name', 255);
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at')->nullable();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 
@@ -26,8 +31,6 @@ class ModifyUsergroupsTable extends Migration
      */
     public function down()
     {
-        Schema::table('usergroups', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('usergroup');
     }
 }

@@ -63,7 +63,7 @@
                             </a>
                         </li>
                         <li class="{{ $elementActive == 'usergroup' ? 'active' : '' }}">
-                            <a href="{{ route('usergroup.lists') }}">
+                            <a href="{{ route('usergroups.list') }}">
                                 <span class="sidebar-mini-icon">{{ __('UG') }}</span>
                                 <span class="sidebar-normal">{{ __(' User Group ') }}</span>
                             </a>

@@ -31,10 +31,12 @@
     @auth()
         @include('layouts.page_templates.auth')
         @include('layouts.navbars.fixed-plugin')
+        @include('subviews.confirmation_modal')
     @endauth
     
     @guest
         @include('layouts.page_templates.guest')
+        @include('subviews.confirmation_modal')
     @endguest
 
     <!--   Core JS Files   -->
@@ -42,6 +44,7 @@
     <script src="{{ asset('paper') }}/js/core/popper.min.js"></script>
     <script src="{{ asset('paper') }}/js/core/bootstrap.min.js"></script>
     <script src="{{ asset('paper') }}/js/plugins/perfect-scrollbar.jquery.min.js"></script>
+    <script src="{{ asset('js/app.js') }}/js/core/jquery.min.js"></script>
     <!--  Google Maps Plugin    -->
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
     <!-- Chart JS -->

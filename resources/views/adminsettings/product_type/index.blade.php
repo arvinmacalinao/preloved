@@ -72,9 +72,9 @@
                                     <td> {{ $ctr++ }} </td>
                                     <td>{{ $row->prod_type_name }}</td>
                                     <td>{{ $row->created_at }}</td>
-                                    <td>{{ $row->encoder->name }}</td>
+                                    <td>{{ $row->encoder->fullname }}</td>
                                     <td>{{ $row->updated_at ?? '-' }}</td>
-                                    <td>{{ $row->updater->name ?? '-'}}</td>
+                                    <td>{{ $row->updater->fullname ?? '-'}}</td>
                                     <td>
                                         <div class="btn-group" role="group">
                                         <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.type.view', ['id' => $row->prod_type_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>

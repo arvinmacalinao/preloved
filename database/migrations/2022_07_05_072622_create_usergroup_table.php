@@ -17,7 +17,7 @@ class CreateUsergroupTable extends Migration
             $table->bigIncrements('ug_id');
             $table->string('ug_name', 255);
             $table->tinyInteger('ug_is_admin')->default(0);
-            $table->string('ug_display_name', 255)->nullable();
+            $table->string('ug_display_name', 255);
             $table->timestamp('created_at');
             $table->timestamp('updated_at')->nullable();
             $table->timestamp('deleted_at')->nullable();
@@ -31,6 +31,6 @@ class CreateUsergroupTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('usergroups');
+        Schema::dropIfExists('usergroup');
     }
 }

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UsergroupController;
@@ -32,8 +33,6 @@ Route::middleware(['guest'])->group(function() {
 
     /************************ END OF AUTHENTICATION ROUTES ************************/
 });
-
-
 
 Route::group(['middleware' => 'auth'], function () {
 
@@ -78,8 +77,10 @@ Route::get('product/download_barcode/{filename}', [ProductController::class, 'do
 
 /* Order */ 
 Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
+Route::post('order/store/{id}', [OrderController::class, 'store'])->name('order.store');
 Route::get('/get-product-details-by-barcode', [OrderController::class, 'getProductDetailsByBarcode'])->name('get-product-details-by-barcode');
 Route::get('/get-product-suggestions', [OrderController::class, 'getProductSuggestions'])->name('get-product-suggestions');
+Route::get('/autocomplete', [OrderController::class, 'autocomplete'])->name('autocomplete');
 
 /* Sales */ 
 Route::any('sales', [SalesController::class, 'index'])->name('sales.list');

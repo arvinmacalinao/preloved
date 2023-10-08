@@ -4,12 +4,13 @@ namespace App\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductOwner extends Model
 {
-
+    use Notifiable;
     use SoftDeletes;
     
     protected $table        = 'product_owners';
@@ -29,5 +30,10 @@ class ProductOwner extends Model
         return $query->where(function($query) use($search) {
 			$query->where('prod_owner_name', 'LIKE', "%$search%");
 		});
+    }
+
+    public function routeNotificationForMail()
+    {
+        return $this->prod_owner_email;
     }
 }

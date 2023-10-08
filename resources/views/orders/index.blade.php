@@ -52,10 +52,10 @@
                         
                         <!-- Search engine section -->
                         <div class="mb-1 position-relative">
-                            <form id="productForm" class="row row-cols-lg-auto g-2 align-items-center" method="POST" action="{{ route('order.store', ['id' => $id]) }}">
+                            <form id="productForm" class="row row-cols-lg-auto g-2 align-items-center productForm" method="POST" action="{{ route('order.store', ['id' => $id]) }}">
                                 @csrf
                                 <div class="col-md-12">
-                                    <input class="form-control" type="text" placeholder="Enter barcode here" name="prodBarcode" id="prodBarcode" maxlength="255" value="">
+                                    <input class="form-control prodBarcode" data-provide="typeahead" type="text" placeholder="Enter barcode here" name="prodBarcode" id="prodBarcode" maxlength="255" value="" autocomplete="off">
                                     <a href="#" id="addProductBtn" class="btn btn-sm btn-success pull-right"><i class="fa fa-plus-circle mr-2"></i> Add {{ $data['page'] }}</a>
                                 </div>
                             </form>
@@ -116,33 +116,15 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12">
-                                    <div class="mb-2">
-                                        <label class="form-label fw-bold" for="order_customer_name">Payment Mode<span class="text-danger">*</span></label><br>
-                                        <div class="form-check-inline ml-1">
-                                            <label class="form-check-label mr-2">
-                                            <input type="radio" class="form-check-input" name="payment_mode_id" id="payment_mode_id" value="1">
-                                            Cash
-                                            </label>
+                                        <div class="mb-2">
+                                            <label class="form-label fw-bold" for="payment_mode_id ">Payment Mode</label>
+                                            <select class="form-control @error('payment_mode_id ') is-invalid @enderror" name="payment_mode_id" id="payment_mode_id">                                
+                                                @foreach($payment_modes as $payment_mode)
+                                                    <option value="{{ $payment_mode->payment_mode_id  }}">{{ $payment_mode->payment_mode_name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="invalid-feedback">@error('payment_mode_id ') {{ $errors->first('payment_mode_id ') }} @enderror</div>
                                         </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label mr-2">
-                                            <input type="radio" class="form-check-input" name="payment_mode_id" id="payment_mode_id" value="2">
-                                            Bank Transfer
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label mr-2">
-                                            <input type="radio" class="form-check-input" name="payment_mode_id" id="payment_mode_id" value="3">
-                                            E-Mobile 
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label mr-2">
-                                            <input type="radio" class="form-check-input" name="payment_mode_id" id="payment_mode_id" value="4">
-                                            Credit Card
-                                            </label>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="mb-2">
@@ -180,9 +162,37 @@
     $(document).ready(function () {
         var addedRowsData = [];
         var addedProductIds = [];
-
-        $(".alert").delay(4000).slideUp(200, function() {
-            $(this).alert('close');
+        var path = "{{ route( 'autocomplete' )}}";
+        let data = [];
+        
+        $('input.prodBarcode').typeahead({
+        source: function(query, process) { // Change 'terms' to 'query'
+        return $.get(path, { query: query }, function(retrievedData) { 
+            // Update 'data' with the retrieved data
+            data = retrievedData;
+            // Change 'terms' to 'query'
+            const transformedData = data.map(item => `${item.prod_barcode} - ${item.prod_description}`); // Extract the 'name' property
+            return process(transformedData);
+            });
+        },
+        updater: function(selectedItem) {
+            // selectedItem is the value of the selected item (prod_description - prod_barcode)
+            const selectedValueParts = selectedItem.split(' - ');
+            const selectedProdDescription = selectedValueParts[1]; // Get prod_description
+            const selectedProdBarcode = selectedValueParts[0]; // Get prod_barcode
+                
+            if (selectedProdBarcode) {
+                // If 'prod_barcode' is present, the user selected by 'prod_description - prod_barcode'
+                // You can use selectedProdBarcode as needed (e.g., display it)
+                console.log(selectedProdBarcode);
+                return selectedProdBarcode; // This is what will be displayed in the input field
+            } else {
+                // If 'prod_barcode' is not present, the user selected by 'prod_description'
+                // You can use selectedProdDescription as needed (e.g., display it)
+                console.log(selectedProdDescription);
+                return selectedProdDescription; // This is what will be displayed in the input field
+            }
+        }
         });
 
         $('#productList').on('input', '.order_quantity, .order_discount', function () {
@@ -213,7 +223,6 @@
                 $('#prodBarcode').val('');
             } else {
                 var barcode = $(this).val();
-                fetchProductSuggestions(barcode);
             }
         });
         
@@ -349,51 +358,7 @@
                 }
             });
         }
-        
-        function fetchProductSuggestions(barcode) {
-            $.ajax({
-                url: '/get-product-suggestions', // Replace with your route URL
-                method: 'GET',
-                data: { barcode: barcode },
-                success: function(response) {
-                 console.log(response)
-                    
-                },
-                error: function() {
-                    // Handle AJAX error here
-                    console.log('Error fetching product suggestions');
-                }
-            });
-        }
-
-        $( "#prodBarcode" ).autocomplete({
-          source: function(request, response) {
-              $.ajax({
-              url: siteUrl + '/' +"get-product-suggestions",
-              data: {
-                      term : request.term
-               },
-              dataType: "json",
-              success: function(data){
-                console.log(data)
-                 var resp = $.map(data,function(obj){
-                      return obj.name;
-                 }); 
-             
-                 response(resp);
-              }
-          });
-        },
-        minLength: 2
-        });
 });
 
-// $(document).on('click', function(event) {
-//     var target = $(event.target);
-    
-//     if (!target.is('#prodBarcode') && !target.is('#productSuggestions')) {
-//         $('#productSuggestions').remove();
-//     }
-// });
     </script>
 @endpush

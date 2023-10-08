@@ -7,12 +7,14 @@ use Exception;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderDetail;
+use App\Models\PaymentMode;
 use App\Models\ProductOwner;
 use Illuminate\Http\Request;
 use App\Models\OrderTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\ProductSoldNotification;
 
 class OrderController extends Controller
 {
@@ -42,9 +44,10 @@ class OrderController extends Controller
 
         $products       = Product::search($search)->get();
         $owners         = ProductOwner::search($search)->get();
+        $payment_modes   = PaymentMode::get();
         $rows           = Order::all();
        
-        return view('orders.index', compact('rows', 'search', 'msg', 'products', 'owners', 'id'));
+        return view('orders.index', compact('rows', 'search', 'msg', 'products', 'owners', 'id', 'payment_modes'));
     }
 
     /**
@@ -84,34 +87,48 @@ class OrderController extends Controller
             
             if ($request->has('prod_id') && is_array($request->input('prod_id'))) {
                 foreach ($request->input('prod_id') as $i => $prodId) {
-                $orderDetail = new OrderDetail;
-                $orderDetail->order_id = $order_id;
-                $orderDetail->prod_id = $prodId;
-                $orderDetail->price = $request->input('prod_price')[$i];
-                $orderDetail->order_quantity = $request->input('order_quantity')[$i];
-                $orderDetail->order_amount_total = $request->input('order_amount_total')[$i];
-                $orderDetail->order_discount = $request->input('order_discount')[$i];
-                $orderDetail->save();
+                    $orderDetail = new OrderDetail;
+                    $orderDetail->order_id = $order_id;
+                    $orderDetail->prod_id = $prodId;
+                    $orderDetail->price = $request->input('prod_price')[$i];
+                    $orderDetail->order_quantity = $request->input('order_quantity')[$i];
+                    $orderDetail->order_amount_total = $request->input('order_amount_total')[$i];
+                    $orderDetail->order_discount = $request->input('order_discount')[$i];
+                    $orderDetail->save();
             
-                // Update product quantity
-            $product = Product::find($prodId);
-            $newQuantity = $product->prod_quantity - $orderDetail->order_quantity;
-
-            // Calculate total amount for this order detail
-            $totalAmount += $orderDetail->order_amount_total;
-
-            if ($newQuantity < 0) {
-                DB::rollBack();
-                return redirect()->back()->with('error', 'Insufficient stock for product ' . $product->prod_description);
-            }
-
-            $product->prod_quantity = $newQuantity;
-            $product->save();
+                    // Update product quantity
+                    $product = Product::find($prodId);
+                    $newQuantity = $product->prod_quantity - $orderDetail->order_quantity;
+                    $prod_id = $product->prod_id;
+            
+                    // Retrieve the product owner by their ID
+                    $productOwner = ProductOwner::findOrFail($product->prod_owner_id);
+            
+                    // Define the product details you want to pass
+                    $orderDetailsForNotif = 'Quantity: ' . $orderDetail->order_quantity . ', Total Price: ' . $orderDetail->order_amount_total;
+            
+                    // Send a notification to the product owner
+                    if ($productOwner) {
+                        $productOwner->notify(new ProductSoldNotification($product, $orderDetailsForNotif));
+                    }
+            
+                    // Calculate total amount for this order detail
+                    $totalAmount += $orderDetail->order_amount_total;
+            
+                    if ($newQuantity < 0) {
+                        DB::rollBack();
+                        return redirect()->back()->with('error', 'Insufficient stock for product ' . $product->prod_description);
+                    }
+            
+                    $product->prod_quantity = $newQuantity;
+                    $product->save();
                 }
             } else {
                 // Handle the case where the input data is missing or not an array.
                 // You can log an error, return an error response, or handle it as needed.
             }
+            
+            
 
             $order_transaction                     = new OrderTransaction;
             $order_transaction->order_id           = $order_id;
@@ -277,8 +294,28 @@ class OrderController extends Controller
             ->orWhere('prod_description', 'like', '%' . $query . '%')
             ->limit(10) // Limit the number of suggestions
             ->get();
-    
-        return response()->json(['suggestions' => $suggestions]);
+        
+        if ($suggestions) {
+            return response()->json(['success' => true, 'suggestions' => $suggestions]);
+        } else {
+            return response()->json(['success' => false, 'error' => 'Product not found or out of stock']);
+        } 
     }
 
+    public function autocomplete(Request $request)
+    {
+        try {
+            $query = $request->input('prodBarcode');
+    
+            $datas = Product::select('prod_barcode', 'prod_description')
+                ->where('prod_barcode', 'like', $query . '%')
+                ->orWhere('prod_description', 'like', '%' . $query . '%')
+                ->limit(10)
+                ->get();
+    
+            return response()->json($datas);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
 }

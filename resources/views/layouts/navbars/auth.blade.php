@@ -9,15 +9,21 @@
                     <p>{{ __('Dashboard') }}</p>
                 </a>
             </li>
-            <li class="{{ $elementActive == 'icons' ? 'active' : '' }}">
+            <li class="{{ $elementActive == 'order' ? 'active' : '' }}">
                 <a href="{{ route('order.lists') }}">
-                    <i class="fa fa-shopping-bag"></i>
-                    <p>{{ __('Orders') }}</p>
+                    <i class="fa fa-barcode"></i>
+                    <p>{{ __('Enter Orders') }}</p>
                 </a>
             </li>
-            <li class="{{ $elementActive == 'icons' ? 'active' : '' }}">
+            <li class="{{ $elementActive == 'sales' ? 'active' : '' }}">
+                <a href="{{ route('sales.list') }}">
+                    <i class="fa fa-usd"></i>
+                    <p>{{ __('Sales') }}</p>
+                </a>
+            </li>
+            <li class="{{ $elementActive == 'product' ? 'active' : '' }}">
                 <a href="{{ route('product.lists') }}">
-                    <i class="nc-icon nc-diamond"></i>
+                    <i class="fa fa-shopping-bag"></i>
                     <p>{{ __('Products') }}</p>
                 </a>
             </li>

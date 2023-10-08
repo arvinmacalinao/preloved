@@ -107,7 +107,7 @@
                                 </div>
                                 <div class="col-md-8">
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <div class="form-group ml-2">
                                       <div class="checkbox">
                                         <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_enabled" id="u_enabled" {{ (old('u_enabled', optional($user)->u_enabled) == 1) ? ' checked="checked"' : ''}}>
@@ -123,9 +123,9 @@
                                       </div>
                                     </div>
                                 </div>
-                                <div class="col-md-9">
+                                <div class="col-md-8">
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <div class="form-group ml-2">
                                       <div class="checkbox">
                                         <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_admin" id="u_is_admin"{{ (old('u_is_admin', optional($user)->u_is_admin) == 1) ? ' checked="checked"' : ''}}>
@@ -141,7 +141,7 @@
                                       </div>
                                     </div>
                                 </div>
-                                <div class="col-md-9">
+                                <div class="col-md-8">
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group ml-2">
@@ -151,7 +151,7 @@
                                       </div>
                                     </div>
                                 </div>
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                 </div>
                             </div>
                             <br>

@@ -17,7 +17,7 @@ class CreateProductOwnersTable extends Migration
             $table->id('prod_owner_id');
             $table->string('prod_owner_name'); // Name of the product owner or seller
             $table->string('prod_owner_email')->unique(); // Email address of the product owner (make it unique)
-            $table->string('prod_owner_phone')->nullable(); // Phone number of the product owner (optional)
+            $table->string('prod_owner_phone')->nullable();
             $table->timestamp('created_at');
             $table->timestamp('updated_at')->nullable();
             $table->timestamp('deleted_at')->nullable();

@@ -3,6 +3,7 @@
     'elementActive' => 'user-group'
 ])
 @section('content')
+<script src="{{ asset('js/app.js') }}"></script>
     <div class="content">
     <!-- This will display any message upon submission. -->
 		@if(strlen($msg) > 0)
@@ -102,12 +103,5 @@
 @endsection
 
 @push('scripts')
-    <script>
-        $(document).ready(function () {
-        setup_grid_delete_btns();
-        });
-        $(".alert").delay(4000).slideUp(200, function() {
-            $(this).alert('close');
-        });
-    </script>
+    
 @endpush

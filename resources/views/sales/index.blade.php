@@ -54,12 +54,12 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col" width="20%">Description</th>
-                                        <th scope="col" width="20%">Price</th>
-                                        <th scope="col" width="20%">Barcode/Serial No.</th>
-                                        <th scope="col">Quantity</th>
-                                        <th scope="col">Type</th>
-                                        <th scope="col">Owner</th>
+                                        <th scope="col" width="10%">Date of Sale</th>
+                                        <th scope="col" width="10%">Customer</th>
+                                        <th scope="col" width="20%">Product Sold</th>
+                                        <th scope="col">Quantity Sold</th>
+                                        <th scope="col">Total Amount</th>
+                                        <th scope="col">Payment Method</th>
                                         <th scope="col"></th>
                                     </tr>
                                 </thead>
@@ -70,41 +70,19 @@
                                 @foreach ($rows as $row)
                                 <tr>
                                     <td> {{ $ctr++ }} </td>
-                                    <td>{{ $row->prod_description }}</td>
-                                    <td>{{ $row->prod_price }}</td>
-                                    @php 
-						            $path1 = base_path('public/storage/generate/barcode/'.$row->barcode_image); 
-					                @endphp
-                                    <td>
-                                        @if(file_exists($path1))
-                                        <a href="{{ Storage::url('generate/barcode/'.$row->barcode_image) }}" target="_blank" title="View">
-                                            <img src="{{ Storage::url('generate/images/'.$row->prod_barcode."c128.png") }}" width="200px">
-                                        </a>
-                                        @else
-						                	Image not found.
-						                @endif
-                                    </td>
-                                    <td>{{ $row->prod_quantity }}</td>
-                                    <td>{{ $row->type->prod_type_name }}</td>
-                                    <td>
-                                        <a href="{{ route('product.owner.view', ['id' => $row->prod_owner_id]) }}" title="View">
-                                            {{ $row->owner->prod_owner_name }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                        <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
-                                        <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
-                                        <a class="btn btn-info btn-sm row-edit-btn" href="{{ route('download.product.barcode', ['filename' => $row->barcode_image]) }}" title="Download"><i class="fa fa-download"></i></a>
-                                        <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
-                                        </div>
-                                    </td>
+                                    <td>{{ date('m-d-y', strtotime($row->transaction->ot_transact_date)) }}</td>
+                                    <td>{{ $row->order->order_customer_name }}</td>
+                                    <td>{{ $row->product->prod_description }}</td>
+                                    <td>{{ $row->order_quantity }}</td>
+                                    <td>{{ $row->order_amount_total }}</td>
+                                    <td>{{ $row->transaction->mode->payment_mode_name }}</td>
+                                    <td></td>
                                 </tr>
                                 @endforeach
                                 </tbody>
                             </table>
                             @if ($rows->isEmpty())
-				            <h3 class="bg-light text-center p-4">No Items Found</h3>
+				                <h3 class="bg-light text-center p-4">No Items Found</h3>
 			                @endif
                         </div>
                     </div>
@@ -116,8 +94,6 @@
 
 @push('scripts')
     <script>
-        $(".alert").delay(4000).slideUp(200, function() {
-            $(this).alert('close');
-        });
+        
     </script>
 @endpush

@@ -187,10 +187,6 @@
     <script>
     $(document).ready(function () {
 
-        $(".alert").delay(4000).slideUp(200, function() {
-            $(this).alert('close');
-        });
-
         $('.add_more').on('click', function() {
         var product = $('.prod_id').html();
         var numberofrow = $('.addMoreProduct tr').length + 1; // Adjust the index

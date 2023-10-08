@@ -14,4 +14,9 @@ class OrderTransaction extends Model
     protected $primaryKey   = 'ot_id';
     protected $fillable     = [ 'order_id', 'ot_payment', 'ot_change', 'ot_total_amount', 'payment_mode_id', 'ot_transace_date', 'created_by', 'updated_by', 'deleted_by', 'created_at', 'updated_at', 'deleted_at' ];
     protected $timestamp    = [ 'created_at', 'updated_at', 'deleted_at' ];
+
+    public function mode()
+    {
+        return $this->belongsTo(PaymentMode::class, 'payment_mode_id', 'payment_mode_id');
+    }
 }

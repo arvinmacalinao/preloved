@@ -18,3 +18,16 @@ function setup_grid_delete_btns() {
       });
     }
   }
+  function setup_confirm_modal_btns() {
+    // modal yes button
+    if ($('#confirm-modal-yes-btn').length) {
+      $('#confirm-modal-yes-btn').click(function () {
+        url = $('#confirm-modal').attr('data-url');
+        window.location = url;
+      });
+    }
+  }
+  
+
+
+  

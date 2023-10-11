@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use View;
 use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Product;
 use Milon\Barcode\DNS1D;
 use App\Models\ProductType;
@@ -42,7 +43,30 @@ class ProductController extends Controller
         $msg        = $request->session()->pull('session_msg', '');
         $search     = $request->get('search') == NULL ? '' : $request->get('search');
 
-        $rows       = Product::search($search)->paginate(20);
+        
+        // Get the logged-in user's ID
+        $user_id = Auth::id();
+    
+        // Check if the logged-in user is a superadmin
+        $isSuperadmin = User::where('id', $user_id)->orWhere('u_is_superadmin', 1)->orWhere('u_is_store_manager')->exists();
+    
+        if ($isSuperadmin) {
+            // If the user is a superadmin, retrieve all Product records
+            $rows = Product::search($search)->paginate(20);
+        } else {
+            // If the user is not a superadmin, check if they are an owner
+            $user = User::where('id', $user_id)->where('u_is_owner', 1)->first();
+        
+            if ($user) {
+                // If the user is an owner, retrieve Product records where the product belongs to them
+                $rows = Product::whereHas('owner', function ($innerQuery) use ($user_id) {
+                        $innerQuery->where('u_id', $user_id);
+                    })->search($search)->paginate(20);
+            } else {
+                // If the user is neither a superadmin nor an owner, restrict access
+                $rows = collect(); // Empty collection to ensure no records are displayed
+            }
+        }
        
         return view('products.index', compact('rows', 'search', 'msg'));
     }

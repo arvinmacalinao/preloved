@@ -22,14 +22,20 @@
                             <div class="col-8">
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
                             </div>
-                            {{-- <div class="col-4 text-right">
-                                <a href="{{ route('product.create') }}" title="Add {{ $data['page'] }}" class="btn btn-sm btn-primary">Add {{ $data['page'] }}</a>
-                            </div> --}}
                         </div>
-                        
                         <!-- Search engine section -->
                         <div class="mb-1 position-relative">
                             <form class="row row-cols-lg-auto g-2 align-items-center" method="POST" action="{{ url()->current() }}">
+                                <div class="col-md-2">
+                                    <div class="input-group-prepend">
+                                    <label class="text-light mr-2" for="range_start">From:</label>
+                                    <input class="form-control datetime_range_start" placeholder="(From)" name="range_start" id="range_start" maxlength=""  type="text" value=""></div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="input-group-prepend">
+                                    <label class="text-light mr-2" for="range_end">To:</label>
+                                    <input class="form-control datetime_range_end" placeholder="(To)" name="range_end" id="range_end" maxlength=""  type="text" value=""></div>
+                                </div>
                                 @csrf
                                 <div class="col-auto">
                                     <input class="form-control" type="text" placeholder="Search" name="search" id="search" maxlength="255" value="{{ old('search', $search) }}">
@@ -94,6 +100,21 @@
 
 @push('scripts')
     <script>
-        
+        $(document).ready(function(){
+                var startDate = new Date(); // Set your desired start date
+                var endDate = new Date();   // Set your desired end date
+                    
+                // Initialize datepicker for the start date
+                $('.datetime_range_start').datepicker({
+                    format: 'yyyy-mm-dd', // Set the desired date format
+                    autoclose: true,
+                });
+            
+                // Initialize datepicker for the end date
+                $('.datetime_range_end').datepicker({
+                    format: 'yyyy-mm-dd', // Set the desired date format
+                    autoclose: true,
+                });
+        });
     </script>
 @endpush

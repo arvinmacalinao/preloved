@@ -68,6 +68,7 @@
                                  ?>
                                 <tbody>
                                 @foreach ($rows as $row)
+                                {{--  style="background-color: {{ $row->prod_quantity == 0 ? '#fab1b1' : 'white' }}" --}}
                                 <tr>
                                     <td> {{ $ctr++ }} </td>
                                     <td>{{ $row->prod_description }}</td>
@@ -84,7 +85,12 @@
 						                	Image not found.
 						                @endif
                                     </td>
-                                    <td>{{ $row->prod_quantity }}</td>
+                                    @if($row->prod_quantity)
+                                        <td>{{ $row->prod_quantity }}</td>
+                                    @else
+                                         <td style="color:rgb(144, 0, 0)">Out of Stock</td>
+                                    @endif
+                                    
                                     <td>{{ $row->type->prod_type_name }}</td>
                                     <td>
                                         <a href="{{ route('product.owner.view', ['id' => $row->prod_owner_id]) }}" title="View">

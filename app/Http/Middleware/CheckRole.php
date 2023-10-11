@@ -30,6 +30,6 @@ class CheckRole
         }
 
         // If the user doesn't have the required role, redirect them or show an error
-        return redirect()->route('home')->with('error', 'Access denied.');
+        return redirect()->route('home')->with('error', 'Your account does not have priviledge for this action.');
     }
 }

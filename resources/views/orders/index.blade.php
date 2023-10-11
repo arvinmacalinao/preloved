@@ -241,6 +241,7 @@
                     addedProductIds.splice(index, 1);
 
                     alert('This product already in the cart.');
+                    $('#prodBarcode').val('');
                 } else {
                     
                 // Add the product to the cart
@@ -348,7 +349,7 @@
                             callback(productDetails);
                         }
                     } else {
-                        alert('Product not found');
+                        alert('Product not found or out of stock');
                         $('#prodBarcode').val('');
                     }
                 },

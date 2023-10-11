@@ -70,6 +70,15 @@ class ProductOwnerController extends Controller
             $request->request->add(['created_by' => Auth::id()]);
             $po     = ProductOwner::create($request->all());
 
+            $lastid = $po->id;
+
+            $emailToCheck = $request->request->get('prod_owner_email');
+            $existingProductOwner = User::where('prod_owner_email', $emailToCheck)->first();
+
+            if (!$existingProductOwner) {
+                // The email doesn't exist, so you can proceed to create a new user
+            }
+
             $request->session()->put('session_msg', 'Record successfully added.');
         } else {
             $po     = ProductOwner::where('prod_owner_id', $id)->first();

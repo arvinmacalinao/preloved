@@ -44,7 +44,7 @@ class ProductSoldNotification extends Notification
             ->line('Your product has been sold.')
             ->line('Product Description: ' . $this->product->prod_description) // Add this line
             ->line('Order Details: ' . $this->orderDetailsForNotif) // Add this line
-            ->action('View Order Details', url('/orders'))
+            ->action('View Order Details', url('/sales'))
             ->line('Thank you for using our platform!');
     }
 

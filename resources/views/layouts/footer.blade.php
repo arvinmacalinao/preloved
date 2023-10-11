@@ -4,7 +4,7 @@
             <nav class="footer-nav">
                 <ul>
                     <li>
-                        <a href="https://cherry.com.ph" target="_blank">{{ __('Cherry') }}</a>
+                        <a href="" target="">{{ __('Luxeford') }}</a>
                     </li>
                 </ul>
             </nav>
@@ -13,7 +13,7 @@
                     ©
                     <script>
                         document.write(new Date().getFullYear())
-                    </script>{{ __(', made with ') }}<i class="fa fa-heart heart"></i>{{ __(' by ') }}<a class="@if(Auth::guest()) text-white @endif" href="" target="_blank">{{ __('Vinmeister') }}</a>{{ __(' follow social -> ') }}<a class="@if(Auth::guest()) text-white @endif" target="_blank" href="https://www.facebook.com/vinnnmeister">{{ __('Facebook') }}</a>
+                    </script>{{ __(' Cosmic Technology Inc.') }}{{ __(' All Rights Reserved.') }}<a class="@if(Auth::guest()) text-white @endif" href="" target="_blank"></a>
                 </span>
             </div>
         </div>

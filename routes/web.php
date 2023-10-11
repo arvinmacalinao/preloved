@@ -23,11 +23,17 @@ use App\Http\Controllers\ProductOwnerController;
 |
 */
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+
+
 
 Route::middleware(['guest'])->group(function() {
     /************************ START OF AUTHENTICATION ROUTES ************************/
     /* Login and Logout Routes */
+
+    Route::get('/', function () {
+        return view('welcome');
+    });
+
     Route::get('login', [LoginController::class, 'loginform'])->name('users.loginform');
     Route::post('loginuser', [LoginController::class, 'login'])->name('users.login');
 
@@ -36,6 +42,7 @@ Route::middleware(['guest'])->group(function() {
 
 Route::group(['middleware' => 'auth'], function () {
 
+// Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::any('logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

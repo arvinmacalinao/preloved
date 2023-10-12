@@ -15,15 +15,12 @@
                                 <h3 class="header text-center">{{ __('Login') }}</h3>
                             </div>
                         </div>
-                        @if(strlen($msg) > 0)
-		<div class="text-danger p-2 fs-5 fw-bold"> {{ $msg }} </div>
-		@endif
                         <div class="card-body ">
 
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">
-                                        <i class="nc-icon nc-single-02"></i>
+                                        <i class="nc-icon nc-single-02 mr-3"></i>
                                     </span>
                                 </div>
                                 <input class="form-control{{ $errors->has('u_email') ? ' is-invalid' : '' }}" type="text" placeholder="Username" name="username" id="username" maxlength="255" required="required" value="{{ old('username') }}" autofocus>
@@ -38,7 +35,7 @@
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">
-                                        <i class="nc-icon nc-single-02"></i>
+                                        <i class="nc-icon nc-single-02 mr-3"></i>
                                     </span>
                                 </div>
                                 <input class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" type="password" placeholder="Password" name="password" id="password" maxlength="255" required="required">
@@ -50,7 +47,11 @@
                                 @endif
                             </div>
 
-                            <div class="form-group">
+                            @if(strlen($msg) > 0)
+                                <div class="text-danger p-2 fs-5 fw-bold"> {{ $msg }} </div>
+                            @endif
+
+                            {{-- <div class="form-group">
                                 <div class="form-check">
                                      <label class="form-check-label">
                                         <input class="form-check-input" name="remember" type="checkbox" value="" {{ old('remember') ? 'checked' : '' }}>
@@ -58,7 +59,7 @@
                                         {{ __('Remember me') }}
                                     </label>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="card-footer">

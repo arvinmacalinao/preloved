@@ -31,12 +31,13 @@ class DashboardController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $msg            = $request->session()->pull('session_msg', '');
         $products = Product::all(); // Fetch your products data (adjust the query as needed)
         $sales    = OrderDetail::all();
 
-        return view('pages.dashboard', [ 'products' => $products, 'sales' => $sales ]);
+        return view('pages.dashboard', [ 'products' => $products, 'sales' => $sales , 'msg' => $msg]);
     }
 
     /**

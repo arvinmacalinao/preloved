@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\OrderDetail;
 use App\Models\ProductOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -32,6 +33,10 @@ class Product extends Model
         return $this->belongsTo(ProductType::class, 'prod_type_id');
     }
 
+    public function orderdetails(){
+        return $this->hasMany(OrderDetail::class, 'prod_id', 'prod_id');
+    }
+
     public function scopeSearch($query, $search) {
         return $query->where(function($query) use($search) {
 			$query->where('prod_description', 'LIKE', "%$search%")
@@ -42,10 +47,30 @@ class Product extends Model
 		});
     }
 
+    public function scopeDateRange($query, $startDate, $endDate)
+    {
+        if ($startDate) {
+            $query->whereDate('updated_at', '>=', $startDate);
+        }
+    
+        if ($endDate) {
+            $query->whereDate('updated_at', '>=', $endDate);
+        }
+    
+        return $query;
+    }
+
+
     public function barcode()
     {
         if(\Storage::disk('generate')->exists('barcode/'.$this->barcode_image)) {
             return asset('generate/barcode/'.$this->barcode_image);
         }
+    }
+
+    public function getBarcodeImageUrlAttribute()
+    {
+        $imageUrl = asset('storage/generate/barcode/' . $this->barcode_image);
+        return file_exists(public_path('storage/generate/barcode/' . $this->barcode_image)) ? $imageUrl : null;
     }
 }

@@ -22,51 +22,72 @@
                             <div class="col-8">
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
                             </div>
+                            <div class="col-4">
+                                <div class="pull-right">
+                                    <a class="btn btn-success btn-sm" id="" href="{{ route('sales.download.excel') }}" name="download-list-btn" class="print-download-btn pr" title="Download List"><span class="fa fa-floppy-o"></span> Download</a>
+                                </div>
+                            </div>
                         </div>
                         <!-- Search engine section -->
                         <div class="mb-1 position-relative">
                             <form class="row row-cols-lg-auto g-2 align-items-center" method="POST" action="{{ url()->current() }}">
+                            @csrf
                                 <div class="col-md-2">
-                                    <div class="input-group-prepend">
-                                    <label class="text-light mr-2" for="range_start">From:</label>
-                                    <input class="form-control datetime_range_start" placeholder="(From)" name="range_start" id="range_start" maxlength=""  type="text" value=""></div>
+                                    <label class="text-light mr-2" for="date_start">Start Date:</label>
+                                    <div class="input-group">
+                                        <input class="form-control date_start" placeholder="(from)" autocomplete="off" name="date_start" id="date_start" maxlength=""  type="text" value="{{ old('date_start', $startDate) }}">
+                                        <span class="input-group-append">
+                                            <span class="input-group-text bg-white">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <div class="input-group-prepend">
-                                    <label class="text-light mr-2" for="range_end">To:</label>
-                                    <input class="form-control datetime_range_end" placeholder="(To)" name="range_end" id="range_end" maxlength=""  type="text" value=""></div>
+                                    <label class="text-light mr-2" for="date_end">End Date:</label>
+                                    <div class="input-group">
+                                        <input class="form-control date_end" placeholder="(To)" autocomplete="off" name="date_end" id="date_end" maxlength=""  type="text" value="{{ old('date_end', $endDate) }}">
+                                        <span class="input-group-append">
+                                            <span class="input-group-text bg-white">
+                                                <i class="fa fa-calendar"></i>
+                                            </span>
+                                        </span>
+                                    </div>
                                 </div>
-                                @csrf
                                 <div class="col-auto">
+                                    <label class="text-light mr-2" for="date_end">Search</label>
+                                    <div class="input-group">
                                     <input class="form-control" type="text" placeholder="Search" name="search" id="search" maxlength="255" value="{{ old('search', $search) }}">
+                                    </div>
                                 </div>
                                 <div class="col-auto">
-                                    <input class="btn btn-primary btn-sm" type="submit" name="search-btn" id="search-btn" value="Search">
+                                    <label class="text-light mr-2" for="date_end"></label>
+                                    <div class="input-group">
+                                        <input class="btn btn-primary btn-sm" type="submit" name="search-btn" id="search-btn" value="Search">
+                                    </div>
                                 </div>
                             </form>
                         </div>
                         <!-- End of search engine section -->
                     </div>
-                    <div class="card-footer ">
-                        
-                    <!-- Pagination section -->
-                        <div class="text-end">
-                            @include('subviews.pagination', ['rows' => $rows])
-                        </div>
-                    <!-- End of pagination section -->
+                    <div class="card-body ">   
+                        <!-- Pagination section -->
+                            <div class="text-right">
+                                @include('subviews.pagination', ['rows' => $rows])
+                            </div>
+                        <!-- End of pagination section -->
                         <hr>
                         <div class="table-responsive">
-                            <table class="table text-center table-flush">
+                            <table class="table table-flush">
                                 <thead class="thead-light">
                                     <tr>
                                         <th scope="col">#</th>
                                         <th scope="col" width="10%">Date of Sale</th>
                                         <th scope="col" width="10%">Customer</th>
                                         <th scope="col" width="20%">Product Sold</th>
-                                        <th scope="col">Quantity Sold</th>
-                                        <th scope="col">Total Amount</th>
-                                        <th scope="col">Payment Method</th>
-                                        <th scope="col"></th>
+                                        <th class="text-right" scope="col">Quantity Sold</th>
+                                        <th class="text-right" scope="col">Total Amount</th>
+                                        <th class="text-right" scope="col">Payment Method</th>
                                     </tr>
                                 </thead>
                                 <?php
@@ -79,10 +100,10 @@
                                     <td>{{ date('m-d-y', strtotime($row->transaction->ot_transact_date)) }}</td>
                                     <td>{{ $row->order->order_customer_name }}</td>
                                     <td>{{ $row->product->prod_description }}</td>
-                                    <td>{{ $row->order_quantity }}</td>
-                                    <td>{{ $row->order_amount_total }}</td>
-                                    <td>{{ $row->transaction->mode->payment_mode_name }}</td>
-                                    <td></td>
+                                    <td class="text-right">{{ $row->order_quantity }}</td>
+                                    <td class="text-right"> &#8369; {{ number_format($row->order_amount_total, 2) }} </td>
+                                    
+                                    <td class="text-right">{{ $row->transaction->mode->payment_mode_name }}</td>
                                 </tr>
                                 @endforeach
                                 </tbody>
@@ -90,6 +111,34 @@
                             @if ($rows->isEmpty())
 				                <h3 class="bg-light text-center p-4">No Items Found</h3>
 			                @endif
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div style="" class="row">
+                            <div class="col-md-6">
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light mb-3" style="max-width: 18rem;">
+                                    <div class="card-header bg-info text-light text-center">
+                                        Total Products Sold
+                                    </div>
+                                    <div class="card-body">
+                                      <h5 class="card-title text-right">{{ $extract->sum('order_quantity') }}</h5>
+                                      
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-light mb-3" style="max-width: 18rem;">
+                                    <div class="card-header bg-primary text-light text-center">
+                                        Total Amount Sold
+                                    </div>
+                                    <div class="card-body">
+                                      <h5 class="card-title text-right">&#8369;{{ number_format($extract->sum('order_amount_total'), 2) }}</h5>
+                                     
+                                    </div>
+                                  </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,20 +150,17 @@
 @push('scripts')
     <script>
         $(document).ready(function(){
-                var startDate = new Date(); // Set your desired start date
-                var endDate = new Date();   // Set your desired end date
-                    
-                // Initialize datepicker for the start date
-                $('.datetime_range_start').datepicker({
-                    format: 'yyyy-mm-dd', // Set the desired date format
-                    autoclose: true,
-                });
-            
-                // Initialize datepicker for the end date
-                $('.datetime_range_end').datepicker({
-                    format: 'yyyy-mm-dd', // Set the desired date format
-                    autoclose: true,
-                });
+            $('.date_start').datepicker({
+                format: 'yyyy-mm-dd', // Set the desired date format
+                todayHighlight:'TRUE',
+                autoclose: true,
+            });
+
+            $('.date_end').datepicker({
+                format: 'yyyy-mm-dd', // Set the desired date format
+                todayHighlight:'TRUE',
+                autoclose: true,
+            });
         });
     </script>
 @endpush

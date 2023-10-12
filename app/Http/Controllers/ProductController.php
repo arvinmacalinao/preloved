@@ -11,6 +11,8 @@ use App\Models\ProductType;
 use Illuminate\Support\Str;
 use App\Models\ProductOwner;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel;
+use App\Exports\ProductsExport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProductValidation;
@@ -40,8 +42,10 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $msg        = $request->session()->pull('session_msg', '');
-        $search     = $request->get('search') == NULL ? '' : $request->get('search');
+        $msg            = $request->session()->pull('session_msg', '');
+        $search         = $request->get('search') == NULL ? '' : $request->get('search');
+        $startDate      = $request->get('date_start') == NULL ? '' : $request->get('date_start');
+        $endDate        = $request->get('date_end') == NULL ? '' : $request->get('date_end');
 
         
         // Get the logged-in user's ID
@@ -52,23 +56,32 @@ class ProductController extends Controller
     
         if ($isSuperadmin) {
             // If the user is a superadmin, retrieve all Product records
-            $rows = Product::search($search)->paginate(20);
+            $extract = Product::search($search)->dateRange($startDate, $endDate)->get();
+            $rows = Product::search($search)->dateRange($startDate, $endDate)->paginate(20);
+
+            $request->session()->put('extract', $extract);
         } else {
             // If the user is not a superadmin, check if they are an owner
             $user = User::where('id', $user_id)->where('u_is_owner', 1)->first();
         
             if ($user) {
+                $extract = Product::whereHas('owner', function ($innerQuery) use ($user_id) {
+                    $innerQuery->where('u_id', $user_id);
+                })->search($search)->dateRange($startDate, $endDate)->paginate(20);
+                
                 // If the user is an owner, retrieve Product records where the product belongs to them
                 $rows = Product::whereHas('owner', function ($innerQuery) use ($user_id) {
                         $innerQuery->where('u_id', $user_id);
-                    })->search($search)->paginate(20);
+                    })->search($search)->dateRange($startDate, $endDate)->paginate(20);
+
+                $request->session()->put('extract', $extract);
             } else {
                 // If the user is neither a superadmin nor an owner, restrict access
                 $rows = collect(); // Empty collection to ensure no records are displayed
             }
         }
        
-        return view('products.index', compact('rows', 'search', 'msg'));
+        return view('products.index', compact('rows', 'search', 'msg', 'extract', 'startDate', 'endDate'));
     }
 
     /**
@@ -337,4 +350,15 @@ class ProductController extends Controller
             return response()->download(storage_path('app/public/' . $filePath));
         }
     }
+
+    public function export(Excel $excel, Request $request)
+    {
+        $now      = Carbon::now()->format('m-d-y');
+        $filename = "products-".$now.".xlsx";
+
+        $extract = $request->session()->get('extract');
+        
+        return $excel->download(new ProductsExport($extract), $filename);
+    }
+
 }

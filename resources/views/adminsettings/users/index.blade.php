@@ -28,11 +28,12 @@
                         </div>
                     </div>
                     <div class="card-footer ">
-                        <hr>
+                        
                         <!-- Pagination section -->
-                        <div class="text-end">
+                        <div class="text-right">
                             @include('subviews.pagination', ['rows' => $rows])
                         </div>
+                        <hr>
                         <!-- End of pagination section -->
                         <div class="table-responsive">
                             <table class="table align-items-center table-flush">

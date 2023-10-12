@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
@@ -40,15 +41,8 @@ Route::middleware(['guest'])->group(function() {
     /************************ END OF AUTHENTICATION ROUTES ************************/
 });
 
-Route::group(['middleware' => 'auth'], function () {
-
-// Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::any('logout', [LoginController::class, 'logout'])->name('logout');
-
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-Route::get('/home', [DashboardController::class, 'index'])->name('home');
-
-/* Users */
+Route::middleware(['auth', 'checkRole:admin'])->group(function () {
+    /* Users */
 Route::get('users', [UserController::class, 'index'])->name('user.lists');
 Route::get('user/create', [UserController::class, 'create'])->name('new.user');
 Route::post('user/store/{id}', [UserController::class, 'store'])->name('store.user');
@@ -65,6 +59,17 @@ Route::get('usergroup/edit/{id}', [UsergroupController::class, 'edit'])->name('u
 Route::get('usergroup/delete/{id}', [UsergroupController::class, 'delete'])->name('usergroup.delete');
 // Route::get('usergroup/disable/{id}', [UsergroupController::class, 'disable'])->name('user.disable');
 // Route::get('usergroup/enable/{id}', [UsergroupController::class, 'enable'])->name('user.enable');
+});
+
+Route::group(['middleware' => 'auth'], function () {
+
+// Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::any('logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/home', [DashboardController::class, 'index'])->name('home');
+
+
 
 
 
@@ -81,6 +86,7 @@ Route::post('product/store/{id}', [ProductController::class, 'store'])->name('pr
 Route::get('product/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
 Route::get('product/delete/{id}', [ProductController::class, 'destroy'])->name('product.delete');
 Route::get('product/download_barcode/{filename}', [ProductController::class, 'download'])->name('download.product.barcode');
+Route::get('product/export/', [ProductController::class, 'export'])->name('products.download.excel');
 
 /* Order */ 
 Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
@@ -91,6 +97,7 @@ Route::get('/autocomplete', [OrderController::class, 'autocomplete'])->name('aut
 
 /* Sales */ 
 Route::any('sales', [SalesController::class, 'index'])->name('sales.list');
+Route::get('sales/export/', [SalesController::class, 'export'])->name('sales.download.excel');
 
 /* Product Type */ 
 Route::get('product-types', [ProductTypeController::class, 'index'])->name('product.type.lists');

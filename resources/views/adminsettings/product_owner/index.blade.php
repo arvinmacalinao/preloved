@@ -45,7 +45,7 @@
                     <div class="card-footer ">
                         
                     <!-- Pagination section -->
-                        <div class="text-end">
+                        <div class="text-right">
                             @include('subviews.pagination', ['rows' => $rows])
                         </div>
                     <!-- End of pagination section -->

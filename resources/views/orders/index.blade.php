@@ -39,7 +39,7 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-    @endif
+        @endif
         <div class="row">
             <div class="col-md-9">
                 <div class="card ">

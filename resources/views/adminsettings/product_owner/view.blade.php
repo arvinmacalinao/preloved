@@ -39,13 +39,13 @@
                                 <!-- End of pagination section -->
                                     <hr>
                                     <div class="table-responsive">
-                                        <table class="table text-center table-flush">
+                                        <table class="table table-flush">
                                             <thead class="thead-light">
                                                 <tr>
                                                     <th scope="col">#</th>
                                                     <th scope="col" width="20%">Description</th>
-                                                    <th scope="col" width="20%">Price</th>
-                                                    <th scope="col" width="20%">Barcode/Serial No.</th>
+                                                    <th class="text-right" scope="col" width="15%">Price</th>
+                                                    <th class="text-center" scope="col" width="20%">Barcode/Serial No.</th>
                                                     <th scope="col">Quantity</th>
                                                     <th scope="col">Type</th>
                                                     <th scope="col"></th>
@@ -59,27 +59,33 @@
                                             <tr>
                                                 <td> {{ $ctr++ }} </td>
                                                 <td>{{ $row->prod_description }}</td>
-                                                <td>{{ $row->prod_price }}</td>
-                                                @php 
-						                        $path1 = base_path('public/storage/generate/barcode/'.$row->barcode_image); 
-					                            @endphp
-                                                <td>
-                                                    @if(file_exists($path1))
-                                                    <a href="{{ Storage::url('generate/barcode/'.$row->barcode_image) }}" target="_blank" title="View">
-                                                        <img src="{{ Storage::url('generate/images/'.$row->prod_barcode."c128.png") }}" width="200px">
+                                                <td class="text-right">&#8369; {{ number_format($row->prod_price, 2) }}</td>
+                                                <td class="text-center">
+                                                    @if($row->barcode_image_url)
+                                                    <a href="{{ $row->barcode_image_url }}" target="_blank" title="View">
+                                                        <img src="{{ asset('storage/generate/images/' . $row->prod_barcode . 'c128.png') }}" width="200px">
                                                     </a>
                                                     @else
-						                            	Image not found.
-						                            @endif
+                                                        Image not found.
+                                                    @endif
                                                 </td>
-                                                <td>{{ $row->prod_quantity }}</td>
+                                                @if($row->prod_quantity)
+                                                    <td>{{ $row->prod_quantity }}<br>
+                                                        <small style="color: rgb(0, 0, 0)" @readonly(true)>Product sold: <span class="text-success">{{ $row->orderdetails->where('prod_id', $row->prod_id)->sum('order_quantity') ?? 0 }}</span></small>
+                                                    </td>
+                                                @else
+                                                     <td style="color:rgb(144, 0, 0)">Out of Stock<br>
+                                                    <small style="color: rgb(0, 0, 0)" @readonly(true)>Product sold: <span class="text-success">{{ $row->orderdetails->where('prod_id', $row->prod_id)->sum('order_quantity') ?? 0 }}</span></small>
+                                                    </td>
+                                                @endif
+                                                
                                                 <td>{{ $row->type->prod_type_name }}</td>
                                                 <td>
                                                     <div class="btn-group" role="group">
-                                                    <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_owner_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
-                                                    <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_owner_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
+                                                    <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
+                                                    <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
                                                     <a class="btn btn-info btn-sm row-edit-btn" href="{{ route('download.product.barcode', ['filename' => $row->barcode_image]) }}" title="Download"><i class="fa fa-download"></i></a>
-                                                    <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_owner_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
+                                                    <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
                                                     </div>
                                                 </td>
                                             </tr>

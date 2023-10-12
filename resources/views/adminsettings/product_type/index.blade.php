@@ -42,10 +42,10 @@
                         </div>
                         <!-- End of search engine section -->
                     </div>
-                    <div class="card-footer ">
+                    <div class="card-body ">
                         
                     <!-- Pagination section -->
-                        <div class="text-end">
+                        <div class="text-right">
                             @include('subviews.pagination', ['rows' => $rows])
                         </div>
                     <!-- End of pagination section -->

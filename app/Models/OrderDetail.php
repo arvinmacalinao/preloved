@@ -28,6 +28,23 @@ class OrderDetail extends Model
 		});
     }
 
+    public function scopeDateRange($query, $startDate, $endDate)
+    {
+        if ($startDate) {
+            $query->WhereHas('transaction', function($transaction) use($startDate) {
+                $transaction->whereDate('ot_transact_date', '>=', $startDate);
+            });
+        }
+    
+        if ($endDate) {
+            $query->WhereHas('transaction', function($transaction) use($endDate) {
+                $transaction->whereDate('ot_transact_date', '<=', $endDate);
+            });
+        }
+    
+        return $query;
+    }
+
     public function order()
     {
         return $this->belongsTo(Order::class, 'order_id');

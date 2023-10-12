@@ -1,6 +1,6 @@
 @extends('layouts.app', [
     'class' => '',
-    'elementActive' => 'user-group'
+    'elementActive' => 'usergroup'
 ])
 @section('content')
 <script src="{{ asset('js/app.js') }}"></script>
@@ -46,7 +46,7 @@
                     <div class="card-footer ">
                         
                     <!-- Pagination section -->
-                        <div class="text-end">
+                        <div class="text-right">
                             @include('subviews.pagination', ['rows' => $rows])
                         </div>
                     <!-- End of pagination section -->

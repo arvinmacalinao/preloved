@@ -1,6 +1,6 @@
 <div class="sidebar" data-color="white" data-active-color="danger">
-    <div class="logo">
-        <a href=""><img src="{{ asset('img') }}/Cherry.png"></a>
+    <div class="logo text-center">
+        <a href=""><img  src="{{ asset('img') }}/cherry.png" width="200" height="50"></a>
     </div>
     <div class="sidebar-wrapper">
         <ul class="nav">
@@ -60,7 +60,7 @@
                         <b class="caret"></b>
                     </p>
                 </a>
-                <div class="collapse show" id="laravelExamples2">
+                <div class="collapse {{ $elementActive == 'users' || $elementActive == 'usergroup' || $elementActive == 'product-type' || $elementActive == 'product-owner' ? 'show' : '' }}" id="laravelExamples2">
                     <ul class="nav">
                         <li class="{{ $elementActive == 'users' ? 'active' : '' }}">
                             <a href="{{ route('user.lists') }}">

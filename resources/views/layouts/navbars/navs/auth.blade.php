@@ -58,12 +58,13 @@
                         <form class="dropdown-item" action="{{ route('logout') }}" id="formLogOut" method="POST" style="display: none;">
                             @csrf
                         </form>
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                        <div class="dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
                             <a class="dropdown-item" href="#">{{ Auth::user()->fullname }}</a>
                             <a class="dropdown-item" onclick="document.getElementById('formLogOut').submit();">{{ __('Log out') }}</a>
                         </div>
                     </div>
                 </li>
+                
             </ul>
         </div>
     </div>

@@ -1,6 +1,6 @@
 <div class="sidebar" data-color="white" data-active-color="danger">
     <div class="logo text-center">
-        <a href=""><img  src="{{ asset('img') }}/cherry.png" width="200" height="50"></a>
+        <a href=""><img  src="{{ asset('img') }}/luxeford_logo.png" width="190" height="47"></a>
     </div>
     <div class="sidebar-wrapper">
         <ul class="nav">
@@ -27,31 +27,31 @@
                     <p>{{ __('Products') }}</p>
                 </a>
             </li>
-            {{-- <li class="{{ $elementActive == 'user' || $elementActive == 'profile' ? 'active' : '' }}">
+            <li class="{{ $elementActive == 'report' || $elementActive == 'salesreport' || $elementActive == 'productsreport' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples">
-                    <i class="fa fa-user-circle-o"></i>
+                    <i class="fa fa-files-o"></i>
                     <p>
-                            {{ __('User') }}
+                            {{ __('Reports') }}
                         <b class="caret"></b>
                     </p>
                 </a>
-                <div class="collapse show" id="laravelExamples">
+                <div class="collapse" id="laravelExamples">
                     <ul class="nav">
-                        <li class="{{ $elementActive == 'profile' ? 'active' : '' }}">
-                            <a href="{{ route('profile.edit') }}">
-                                <span class="sidebar-mini-icon">{{ __('UP') }}</span>
-                                <span class="sidebar-normal">{{ __(' User Profile ') }}</span>
+                        <li class="{{ $elementActive == 'salesreport' ? 'active' : '' }}">
+                            <a href="{{ route('sales.report') }}">
+                                <span class="sidebar-mini-icon">{{ __('SR') }}</span>
+                                <span class="sidebar-normal">{{ __(' Sales Report ') }}</span>
                             </a>
                         </li>
-                        <li class="{{ $elementActive == 'user' ? 'active' : '' }}">
-                            <a href="{{ route('page.index', 'user') }}">
-                                <span class="sidebar-mini-icon">{{ __('UM') }}</span>
-                                <span class="sidebar-normal">{{ __(' User Management ') }}</span>
+                        <li class="{{ $elementActive == 'productsreport' ? 'active' : '' }}">
+                            <a href="">
+                                <span class="sidebar-mini-icon">{{ __('PR') }}</span>
+                                <span class="sidebar-normal">{{ __(' Product Report ') }}</span>
                             </a>
                         </li>
                     </ul>
                 </div>
-            </li> --}}
+            </li>
             <li class="{{ $elementActive == 'users' || $elementActive == 'profile' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples2">
                     <i class="fa fa-cogs"><img src=""></i>

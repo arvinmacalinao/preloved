@@ -89,9 +89,9 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-2">
-                                        <label class="form-label fw-bold" for="u_password_confirmation">Password Confirmation<span class="text-danger">*</span></label>
-                                        <input placeholder="Password Confirmation" class="form-control @error('u_password_confirmation') is-invalid @enderror" type="password" maxlength="255" name="u_password_confirmation" id="u_password_confirmation" value="">
-                                        <div class="invalid-feedback">@error('u_password_confirmation') {{ $errors->first('u_password_confirmation') }} @enderror</div>
+                                        <label class="form-label fw-bold" for="password_confirmation">Password Confirmation<span class="text-danger">*</span></label>
+                                        <input placeholder="Password Confirmation" class="form-control @error('password_confirmation') is-invalid @enderror" type="password" maxlength="255" name="password_confirmation" id="password_confirmation" value="">
+                                        <div class="invalid-feedback">@error('password_confirmation') {{ $errors->first('password_confirmation') }} @enderror</div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -110,48 +110,38 @@
                                 <div class="col-md-2">
                                     <div class="form-group ml-2">
                                       <div class="checkbox">
-                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_enabled" id="u_enabled" {{ (old('u_enabled', optional($user)->u_enabled) == 1) ? ' checked="checked"' : ''}}>
+                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_admin" id="u_is_admin"{{ (old('u_is_admin', optional($user)->u_is_admin) == 1) ? ' checked="checked"' : ''}}>
+						                <label class="form-check-label fw-bold" for="u_is_admin">Store Admin</label>
+                                      </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group ml-2">
+                                      <div class="checkbox">
+                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_cashier" id="u_is_cashier"{{ (old('u_is_cashier', optional($user)->u_is_cashier) == 1) ? ' checked="checked"' : ''}}>
+						                <label class="form-check-label fw-bold" for="u_is_cashier">Store Cashier</label>
+                                      </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group ml-2">
+                                      <div class="checkbox">
+                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" checked name="u_enabled" id="u_enabled" {{ (old('u_enabled', optional($user)->u_enabled) == 1) ? ' checked="checked"' : ''}}>
 						                <label class="form-check-label fw-bold" for="u_enabled">Enabled</label>
                                       </div>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
+                                    @if(auth()->user()->u_is_superadmin)
                                     <div class="form-group ml-2">
-                                      <div class="checkbox">
-                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_superadmin" id="u_is_superadmin"{{ (old('u_is_superadmin', optional($user)->u_is_superadmin) == 1) ? ' checked="checked"' : ''}}>
-						                <label class="form-check-label fw-bold" for="u_is_superadmin">Is Superadmin</label>
-                                      </div>
+                                        <div class="checkbox">
+                                            <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_superadmin" id="u_is_superadmin"{{ (old('u_is_superadmin', optional($user)->u_is_superadmin) == 1) ? ' checked="checked"' : ''}}>
+                                            <label class="form-check-label fw-bold" for="u_is_superadmin">Is Superadmin</label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-8">
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group ml-2">
-                                      <div class="checkbox">
-                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_admin" id="u_is_admin"{{ (old('u_is_admin', optional($user)->u_is_admin) == 1) ? ' checked="checked"' : ''}}>
-						                <label class="form-check-label fw-bold" for="u_is_admin">Admin</label>
-                                      </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group ml-2">
-                                      <div class="checkbox">
-                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_owner" id="u_is_owner"{{ (old('u_is_owner', optional($user)->u_is_owner) == 1) ? ' checked="checked"' : ''}}>
-						                <label class="form-check-label fw-bold" for="u_is_owner">Product Owner</label>
-                                      </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group ml-2">
-                                      <div class="checkbox">
-                                        <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_store_manager" id="u_is_store_manager" {{ (old('u_is_store_manager', optional($user)->u_is_store_manager) == 1) ? ' checked="checked"' : ''}}>
-						                <label class="form-check-label fw-bold" for="u_is_store_manager">Store Manager</label>
-                                      </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
+                                    @endif
                                 </div>
                             </div>
                             <br>

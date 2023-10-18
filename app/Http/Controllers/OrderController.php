@@ -14,7 +14,6 @@ use App\Models\OrderTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Notifications\ProductSoldNotification;
 
 class OrderController extends Controller
 {
@@ -100,17 +99,6 @@ class OrderController extends Controller
                     $product = Product::find($prodId);
                     $newQuantity = $product->prod_quantity - $orderDetail->order_quantity;
                     $prod_id = $product->prod_id;
-            
-                    // Retrieve the product owner by their ID
-                    $productOwner = ProductOwner::findOrFail($product->prod_owner_id);
-            
-                    // Define the product details you want to pass
-                    $orderDetailsForNotif = 'Quantity: ' . $orderDetail->order_quantity . ', Total Price: ' . $orderDetail->order_amount_total;
-            
-                    // Send a notification to the product owner
-                    if ($productOwner) {
-                        $productOwner->notify(new ProductSoldNotification($product, $orderDetailsForNotif));
-                    }
             
                     // Calculate total amount for this order detail
                     $totalAmount += $orderDetail->order_amount_total;

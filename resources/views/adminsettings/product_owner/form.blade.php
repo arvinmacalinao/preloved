@@ -37,13 +37,13 @@
                                 <div class="invalid-feedback">@error('prod_owner_name') {{ $errors->first('prod_owner_name') }} @enderror</div>
                             </div>
                             <div class="mb-2">
-                                <label class="form-label fw-bold" for="prod_owner_email">Owner Email<span class="text-danger">*</span></label>
-                                <input placeholder="Owner Email" class="form-control @error('prod_owner_email') is-invalid @enderror" type="text" maxlength="255" name="prod_owner_email" id="prod_owner_email" value="{{ old('prod_owner_email', $po->prod_owner_email) }}" required>
+                                <label class="form-label fw-bold" for="prod_owner_email">Owner Email</label>
+                                <input placeholder="Owner Email" class="form-control @error('prod_owner_email') is-invalid @enderror" type="text" maxlength="255" name="prod_owner_email" id="prod_owner_email" value="{{ old('prod_owner_email', $po->prod_owner_email) }}">
                                 <div class="invalid-feedback">@error('prod_owner_email') {{ $errors->first('prod_owner_email') }} @enderror</div>
                             </div>
                             <div class="mb-2">
-                                <label class="form-label fw-bold" for="prod_owner_phone">Owner Phone No.<span class="text-danger">*</span></label>
-                                <input placeholder="Owner Phone No." class="form-control @error('prod_owner_phone') is-invalid @enderror" type="text" maxlength="255" name="prod_owner_phone" id="prod_owner_phone" value="{{ old('prod_owner_phone', $po->prod_owner_phone) }}" required>
+                                <label class="form-label fw-bold" for="prod_owner_phone">Owner Phone No.</label>
+                                <input placeholder="Owner Phone No." class="form-control @error('prod_owner_phone') is-invalid @enderror" type="text" maxlength="255" name="prod_owner_phone" id="prod_owner_phone" value="{{ old('prod_owner_phone', $po->prod_owner_phone) }}">
                                 <div class="invalid-feedback">@error('prod_owner_phone') {{ $errors->first('prod_owner_phone') }} @enderror</div>
                             </div>
                             <br>

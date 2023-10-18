@@ -26,8 +26,7 @@ class CreateUsersTable extends Migration
             $table->foreign('ug_id')->references('ug_id')->on('usergroups');
             $table->tinyInteger('u_enabled')->default(0);
             $table->tinyInteger('u_is_superadmin')->default(0);
-            $table->tinyInteger('u_is_owner')->default(0);
-            $table->tinyInteger('u_is_store_manager')->default(0);
+            $table->tinyInteger('u_is_cashier')->default(0);
             $table->tinyInteger('u_is_admin')->default(0);
             $table->tinyInteger('synched')->default(0);
             $table->date('sync_date')->nullable();

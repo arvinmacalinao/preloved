@@ -43,7 +43,7 @@
         <div class="row">
             <div class="col-md-9">
                 <div class="card ">
-                    <div class="card-header border-0 text-light" style="background-color:salmon;">
+                    <div class="card-header border-0 text-light" style="background-color:rgb(124, 124, 124);">
                         <div class="row align-items-center">
                             <div class="col-8">
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
@@ -92,7 +92,7 @@
             </div>
             <div class="col-md-3">
                 <div class="card ">
-                    <div class="card-header border-0 text-light" style="background-color:salmon;">
+                    <div class="card-header border-0 text-light" style="background-color:rgb(124, 124, 124);">
                         <div class="row align-items-center">
                             <div class="col-md-12">
                                 <h5 class="card-title">Total: <span class="total">0.00</span></h5>
@@ -160,20 +160,22 @@
 @push('scripts')
     <script>
     $(document).ready(function () {
-        var addedRowsData = [];
         var addedProductIds = [];
         var path = "{{ route( 'autocomplete' )}}";
         let data = [];
         
         $('input.prodBarcode').typeahead({
-        source: function(query, process) { // Change 'terms' to 'query'
-        return $.get(path, { query: query }, function(retrievedData) { 
-            // Update 'data' with the retrieved data
-            data = retrievedData;
-            // Change 'terms' to 'query'
-            const transformedData = data.map(item => `${item.prod_barcode} - ${item.prod_description}`); // Extract the 'name' property
-            return process(transformedData);
-            });
+            source: function(query, process) {
+        if (query.length >= 2 && query.length < 10) { // Check if the query length is at least 3 characters
+            return $.get(path, { query: query }, function(retrievedData) {
+                data = retrievedData;
+                const transformedData = data.map(item => `${item.prod_barcode} - ${item.prod_description}`);
+                return process(transformedData);
+                });
+            }
+            else{
+            process([]);
+        }
         },
         updater: function(selectedItem) {
             // selectedItem is the value of the selected item (prod_description - prod_barcode)
@@ -221,12 +223,12 @@
                 $('#addProductBtn').click(); // Trigger the button click event
                 // Clear the input box
                 $('#prodBarcode').val('');
+                $(this).trigger('typeahead:close');
             } else {
                 var barcode = $(this).val();
             }
         });
         
-        var addedRowsData = []; // Array to store data for added rows
 
         $('#addProductBtn').click(function() {
             var barcode = $('#prodBarcode').val();
@@ -234,13 +236,12 @@
             getProductDetailsByBarcode(barcode, function(productDetails) {
 
                 var productId = productDetails.prod_id;
+                console.log("Adding product with ID: " + productId);
 
                 // Check if the product has already been added
+                // Check if the product has already been added
                 if (addedProductIds.includes(productId)) {
-                    var index = addedProductIds.indexOf(productId);
-                    addedProductIds.splice(index, 1);
-
-                    alert('This product already in the cart.');
+                    alert("This product is already in the cart.");
                     $('#prodBarcode').val('');
                 } else {
                     
@@ -248,35 +249,53 @@
                 addedProductIds.push(productId);
 
                 if (productDetails) {
-                productCount++;
-                var newRow = `
-                <tr>
-                    <td>${productCount}</td>
-                    <td><input type="text" class="form-control prod_description" name="prod_description[]" value="${productDetails.prod_description}"></td>
-                    <td><input type="number" class="form-control order_quantity" name="order_quantity[]" value="1" min="1" data-max-quantity="${productDetails.prod_quantity}"></td>
-                    <td><input type="number" class="form-control prod_price" name="prod_price[]" value="${productDetails.prod_price}" readonly></td>
-                    <td><input type="number" class="form-control order_discount" name="order_discount[]" value="0" min="0" max="100"></td>
-                    <td><input type="number" class="total_amount form-control" name="order_amount_total[]" value="0.00" readonly></td>
-                    <td><button class="btn btn-danger removeProduct">Remove</button></td>
-                    <input type="hidden" class="prod_id" name="prod_id[]" value="${productDetails.prod_id}">
-                </tr>
-                `;
+                        productCount++;
+                        var newRow = `
+                        <tr>
+                            <td>${productCount}</td>
+                            <td><input type="text" class="form-control prod_description" name="prod_description[]" value="${productDetails.prod_description}"></td>
+                            <td><input type="number" class="form-control order_quantity" name="order_quantity[]" value="1" min="1" data-max-quantity="${productDetails.prod_quantity}"></td>
+                            <td><input type="number" class="form-control prod_price" name="prod_price[]" value="${productDetails.prod_price}" readonly></td>
+                            <td><input type="number" class="form-control order_discount" name="order_discount[]" value="0" min="0" max="100"></td>
+                            <td><input type="number" class="total_amount form-control" name="order_amount_total[]" value="0.00" readonly></td>
+                            <td><button class="btn btn-danger removeProduct">Remove</button></td>
+                            <input type="hidden" class="prod_id" name="prod_id[]" value="${productDetails.prod_id}">
+                        </tr>
+                        `;
+                    
+                        $('#productList').append(newRow);
+                    
+                        // Bind calculation logic to input fields (except the newly added row)
+                        $(document).on('input', '.order_quantity, .order_discount', calculateTotal);
+                    
+                        // Remove product row
 
-                $('#productList').append(newRow);
+                        console.log(addedProductIds);
 
-                // Bind calculation logic to input fields (except the newly added row)
-                $(document).on('input', '.order_quantity, .order_discount', calculateTotal);
+                        $('.removeProduct').click(function() {
+                            var productId = $(this).closest('tr').find('.prod_id').val();
+                            console.log("Removing product with ID: " + productId);
 
-                // Remove product row
-                $('.removeProduct').click(function() {
-                    $(this).closest('tr').remove();
-                    calculateTotal();
-                });
+                            // Remove the product from the addedProductIds array
+                            addedProductIds = addedProductIds.filter(function(id) {
+                                return id !== productId;
+                            });
 
-                // Clear input field
-                $('#prodBarcode').val('');
-                calculateTotal();
-                }
+                            // const index = addedProductIds.indexOf(productId);
+                            // if (index > -1) { // only splice array when item is found
+                            //     addedProductIds.splice(addedProductIds, 1); // 2nd parameter means remove one item only
+                            // }
+                            
+                            console.log(addedProductIds);
+
+                            $(this).closest('tr').remove();
+                            calculateTotal();
+                        });
+                    
+                        // Clear input field
+                        $('#prodBarcode').val('');
+                        calculateTotal();
+                    }
                 }
             });
         });

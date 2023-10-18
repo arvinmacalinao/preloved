@@ -59,7 +59,6 @@
                                         <th scope="col" width="20%">Email</th>
                                         <th scope="col" width="20%">Phone no.</th>
                                         <th scope="col">Date Created</th>
-                                        <th scope="col">Encoder</th>
                                         <th scope="col"></th>
                                     </tr>
                                 </thead>
@@ -71,10 +70,9 @@
                                 <tr>
                                     <td> {{ $ctr++ }} </td>
                                     <td>{{ $row->prod_owner_name }}</td>
-                                    <td>{{ $row->prod_owner_email }}</td>
-                                    <td>{{ $row->prod_owner_phone }}</td>
+                                    <td>{{ $row->prod_owner_email ?? '-' }}</td>
+                                    <td>{{ $row->prod_owner_phone ?? '-' }}</td>
                                     <td>{{ $row->created_at }}</td>
-                                    <td>{{ $row->encoder->name }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
                                         <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.owner.view', ['id' => $row->prod_owner_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>

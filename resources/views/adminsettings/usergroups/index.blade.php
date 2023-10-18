@@ -3,7 +3,6 @@
     'elementActive' => 'usergroup'
 ])
 @section('content')
-<script src="{{ asset('js/app.js') }}"></script>
     <div class="content">
     <!-- This will display any message upon submission. -->
 		@if(strlen($msg) > 0)

@@ -1,6 +1,6 @@
 @extends('layouts.app', [
     'class' => '',
-    'elementActive' => 'products'
+    'elementActive' => 'product'
 ])
 @section('content')
     <div class="content">
@@ -17,7 +17,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card ">
-                    <div class="card-header border-0 text-light" style="background-color:salmon;">
+                    <div class="card-header border-0 text-light" style="background-color:rgb(124, 124, 124);">
                         <div class="row align-items-center">
                             <div class="col-8">
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
@@ -52,6 +52,18 @@
                                                 <i class="fa fa-calendar"></i>
                                             </span>
                                         </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="mb-2 dd">
+                                        <label class="form-label fw-bold text-light" for="prod_type_id">Product Type</label>
+                                        <select class="form-control @error('prod_type_id') is-invalid @enderror" name="prod_type_id" id="prod_type_id">
+                                            <option value="">All</option>
+                                            @foreach($types as $type)
+                                                <option value="{{ $type->prod_type_id }}" >{{ $type->prod_type_name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="invalid-feedback">@error('prod_type_id') {{ $errors->first('prod_type_id') }} @enderror</div>
                                     </div>
                                 </div>
                                 <div class="col-auto">
@@ -165,8 +177,15 @@
                                         Total Amount
                                     </div>
                                     <div class="card-body">
-                                      <h5 class="card-title text-right">&#8369;{{ number_format($extract->sum('prod_price'), 2) }}</h5>
-                                     
+                                    @php
+                                        $totalPrice = 0; // Initialize the total price to 0
+                                            foreach ($rows as $row) {
+                                                $quantity = $row->prod_quantity;
+                                                $price = $row->prod_price;
+                                                $totalPrice += $quantity * $price; // Calculate and accumulate the total price
+                                            }
+                                        @endphp
+                                    <h5 class="card-title text-right">&#8369;{{ number_format($totalPrice, 2) }}</h5>
                                     </div>
                                   </div>
                             </div>

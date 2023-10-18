@@ -47,6 +47,12 @@ class Product extends Model
 		});
     }
 
+    public function scopeProdType($query, $qtype) {
+        if ($qtype) {
+            $query->where('prod_type_id', $qtype);
+        }
+    }
+
     public function scopeDateRange($query, $startDate, $endDate)
     {
         if ($startDate) {

@@ -17,14 +17,11 @@ class CheckRole
         // Check if the user has the required role
         $hasRequiredRole = false;
         switch ($role) {
-            case 'storemanager':
-                $hasRequiredRole = auth()->user()->u_is_store_manager;
-                break;
             case 'admin':
                 $hasRequiredRole = auth()->user()->u_is_admin;
                 break;
-            case 'productowner':
-                $hasRequiredRole = auth()->user()->u_is_owner;
+            case 'cashier':
+                $hasRequiredRole = auth()->user()->u_is_store_manager;
                 break;
         }
     

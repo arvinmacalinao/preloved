@@ -15,7 +15,7 @@ class ProductOwner extends Model
     
     protected $table        = 'product_owners';
     protected $primaryKey   = 'prod_owner_id';
-    protected $fillable     = [ 'prod_owner_name', 'prod_owner_email', 'prod_owner_phone', 'created_by', 'updated_by'];
+    protected $fillable     = [ 'prod_owner_name', 'prod_owner_email', 'prod_owner_phone', 'created_by', 'updated_by', 'created_at', 'updated_at'];
     protected $timestamp    = ['created_at', 'updated_at'];
 
     public function encoder() {
@@ -30,6 +30,10 @@ class ProductOwner extends Model
         return $query->where(function($query) use($search) {
 			$query->where('prod_owner_name', 'LIKE', "%$search%");
 		});
+    }
+
+    public function user() {
+        return $this->belongsTo(User::class, 'id', 'u_id');
     }
 
     public function routeNotificationForMail()

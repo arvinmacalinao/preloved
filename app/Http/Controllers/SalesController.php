@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\ProductType;
 use App\Exports\SalesExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
@@ -40,45 +41,14 @@ class SalesController extends Controller
         $search         = $request->get('search') == NULL ? '' : $request->get('search');
         $startDate      = $request->get('date_start') == NULL ? '' : $request->get('date_start');
         $endDate        = $request->get('date_end') == NULL ? '' : $request->get('date_end');
-    
-        // Get the logged-in user's ID
-        $user_id = Auth::id();
-    
-        // Check if the logged-in user is a superadmin
-        $isSuperadmin = User::where('id', $user_id)->where('u_is_superadmin', 1)->exists();
-    
-        if ($isSuperadmin) {
-            // If the user is a superadmin, retrieve all OrderDetail records
-            $extract = OrderDetail::search($search)->dateRange($startDate, $endDate)->get();
-            $rows    = OrderDetail::search($search)->dateRange($startDate, $endDate)->paginate(20);
+        $qtype          = $request->get('prod_type_id') == NULL ? '' : $request->get('prod_type_id');
 
-            $request->session()->put('extract', $extract);
-        } else {
-            // If the user is not a superadmin, check if they are an owner
-            $user = User::where('id', $user_id)->where('u_is_owner', 1)->first();
-        
-            if ($user) {
-                // If the user is an owner, retrieve OrderDetail records where the product belongs to them
-                $extract = OrderDetail::whereHas('product', function ($query) use ($user_id) {
-                    $query->whereHas('owner', function ($innerQuery) use ($user_id) {
-                        $innerQuery->where('u_id', $user_id);
-                    });
-                })->search($search)->dateRange($startDate, $endDate)->get();
-
-                $rows = OrderDetail::whereHas('product', function ($query) use ($user_id) {
-                    $query->whereHas('owner', function ($innerQuery) use ($user_id) {
-                        $innerQuery->where('u_id', $user_id);
-                    });
-                })->search($search)->dateRange($startDate, $endDate)->paginate(20);
-
-                $request->session()->put('extract', $extract);
-            } else {
-                // If the user is neither a superadmin nor an owner, restrict access
-                $rows = collect(); // Empty collection to ensure no records are displayed
-            }
-        }
+        $types          =   ProductType::get();
+   
+        $extract = OrderDetail::search($search)->prodType($qtype)->dateRange($startDate, $endDate)->get();
+        $rows    = OrderDetail::search($search)->prodType($qtype)->dateRange($startDate, $endDate)->paginate(20);
     
-        return view('sales.index', compact('rows', 'search', 'msg' , 'extract', 'endDate', 'startDate'));
+        return view('sales.index', compact('rows', 'search', 'msg' , 'extract', 'endDate', 'startDate', 'types', 'qtype'));
     }
 
     /**

@@ -26,8 +26,8 @@ class ProductOwnerValidation extends FormRequest
         }
         return [
 			'prod_owner_name'        => 'bail|required|string|min:1|max:255|unique:product_owners,prod_owner_email'.($id > 0 ? ','.$item->prod_owner_id.',prod_owner_id' : ''),
-            'prod_owner_email'       => 'bail|required|email|unique:product_owners,prod_owner_email'.($id > 0 ? ','.$item->prod_owner_id.',prod_owner_id' : ''),
-            'prod_owner_phone'       => 'bail|required|string|min:1|max:255|'
+            'prod_owner_email'       => 'bail|nullable|email|',
+            'prod_owner_phone'       => 'bail|nullable|string|min:1|max:255|'
         ];
     }
 

@@ -22,10 +22,20 @@ class OrderDetail extends Model
             ->orWhereHas('order', function($order) use($search) {
                 $order->where('order_customer_name', 'like', "%$search%");
                 })
-                ->orWhereHas('product', function($product) use($search) {
+            ->orWhereHas('product', function($product) use($search) {
                 $product->where('prod_description', 'like', "%$search%");
-                });
+            });
 		});
+    }
+
+    public function scopeprodType($query, $qtype) {
+        if ($qtype) {
+            $query->WhereHas('product', function($product) use($qtype) {
+                $product->WhereHas('type', function($type) use($qtype) {
+                    $type->where('prod_type_id', $qtype);
+                    });
+                });
+            }
     }
 
     public function scopeDateRange($query, $startDate, $endDate)
@@ -50,13 +60,13 @@ class OrderDetail extends Model
         return $this->belongsTo(Order::class, 'order_id');
     }
 
-    public function product()
-    {
-        return $this->belongsTo(Product::class, 'prod_id');
-    }
-
     public function transaction()
     {
         return $this->belongsTo(OrderTransaction::class, 'order_id', 'order_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'prod_id');
     }
 }

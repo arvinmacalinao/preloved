@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UsergroupController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProductTypeController;
+use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\ProductOwnerController;
 
 /*
@@ -35,7 +36,7 @@ Route::middleware(['guest'])->group(function() {
         return view('welcome');
     });
 
-    Route::get('login', [LoginController::class, 'loginform'])->name('users.loginform');
+    Route::any('login', [LoginController::class, 'loginform'])->name('users.loginform');
     Route::post('loginuser', [LoginController::class, 'login'])->name('users.login');
 
     /************************ END OF AUTHENTICATION ROUTES ************************/
@@ -59,6 +60,17 @@ Route::get('usergroup/edit/{id}', [UsergroupController::class, 'edit'])->name('u
 Route::get('usergroup/delete/{id}', [UsergroupController::class, 'delete'])->name('usergroup.delete');
 // Route::get('usergroup/disable/{id}', [UsergroupController::class, 'disable'])->name('user.disable');
 // Route::get('usergroup/enable/{id}', [UsergroupController::class, 'enable'])->name('user.enable');
+
+/* Sales */ 
+Route::any('sales', [SalesController::class, 'index'])->name('sales.list');
+Route::get('sales/export/', [SalesController::class, 'export'])->name('sales.download.excel');
+
+/* Report */
+
+/* Sales Report */
+Route::any('sales_report', [SalesReportController::class, 'index'])->name('sales.report');
+Route::get('sales_report/export_pdf/', [SalesReportController::class, 'exportPDF'])->name('sales.report.pdf');
+
 });
 
 Route::group(['middleware' => 'auth'], function () {
@@ -68,9 +80,6 @@ Route::any('logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/home', [DashboardController::class, 'index'])->name('home');
-
-
-
 
 
 // Route::resource('users', 'App\Http\Controllers\UserController', ['except' => ['show']])->name('users');
@@ -87,6 +96,7 @@ Route::get('product/edit/{id}', [ProductController::class, 'edit'])->name('produ
 Route::get('product/delete/{id}', [ProductController::class, 'destroy'])->name('product.delete');
 Route::get('product/download_barcode/{filename}', [ProductController::class, 'download'])->name('download.product.barcode');
 Route::get('product/export/', [ProductController::class, 'export'])->name('products.download.excel');
+Route::get('/autocompleteOwner', [ProductController::class, 'autocompleteOwner'])->name('autocompleteOwner');
 
 /* Order */ 
 Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
@@ -94,10 +104,6 @@ Route::post('order/store/{id}', [OrderController::class, 'store'])->name('order.
 Route::get('/get-product-details-by-barcode', [OrderController::class, 'getProductDetailsByBarcode'])->name('get-product-details-by-barcode');
 Route::get('/get-product-suggestions', [OrderController::class, 'getProductSuggestions'])->name('get-product-suggestions');
 Route::get('/autocomplete', [OrderController::class, 'autocomplete'])->name('autocomplete');
-
-/* Sales */ 
-Route::any('sales', [SalesController::class, 'index'])->name('sales.list');
-Route::get('sales/export/', [SalesController::class, 'export'])->name('sales.download.excel');
 
 /* Product Type */ 
 Route::get('product-types', [ProductTypeController::class, 'index'])->name('product.type.lists');
@@ -117,8 +123,3 @@ Route::get('product-owner/delete/{id}', [ProductOwnerController::class, 'destroy
 
 
 });
-
-// Route::group(['middleware' => 'auth'], function () {
-// 	Route::get('{page}', ['as' => 'page.index', 'uses' => 'App\Http\Controllers\PageController@index']);
-// });
-

@@ -55,31 +55,9 @@ class UserController extends Controller
     {
         $input      = $request->validated();
         if($id == 0) {
-            $getowner = $request->request->get('u_is_owner');
             
             $request->request->add(['created_at' => Carbon::now()]);
             $user   = User::create($request->all());
-
-            $lastid = $user->id;
-            if($getowner == 1)
-            {
-                $getfname   = $request->request->get('u_fname');
-                $getlname   = $request->request->get('u_lname');
-                $getmname   = $request->request->get('u_mname');
-                $getemail   = $request->request->get('u_email');
-                $getmobile  = $request->request->get('u_mobile');
-                $getencoder = Auth::id();
-
-                $getname    = $getfname . ' ' . $getmname . ' ' . $getlname;
-                $prod_owner = new ProductOwner;
-                
-                $prod_owner->prod_owner_name    = $getname;
-                $prod_owner->prod_owner_email   = $getemail;
-                $prod_owner->prod_owner_phone   = $getmobile;
-                $prod_owner->u_id               = $lastid;
-                $prod_owner->created_by         = $getencoder;
-                $prod_owner->save();   
-            }
 
         } else {
             $user   = User::where('id', $id)->first();
@@ -93,7 +71,7 @@ class UserController extends Controller
                     $user->password = $request->input('password');
                 }
                 
-                $checkboxFields = ['u_enabled', 'u_is_superadmin', 'u_is_admin', 'u_is_owner', 'u_is_store_manager'];
+                $checkboxFields = ['u_enabled', 'u_is_superadmin', 'u_is_admin', 'u_is_cashier'];
 
                 foreach ($checkboxFields as $field) {
                     $value = $request->has($field) ? 1 : 0;

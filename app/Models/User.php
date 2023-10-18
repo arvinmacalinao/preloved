@@ -16,7 +16,7 @@ class User extends Authenticatable
 
     protected $table        = 'users';
     protected $primaryKey   = 'id';
-    protected $fillable     = [ 'u_fname', 'u_mname', 'u_lname', 'u_username', 'u_email', 'u_mobile', 'password', 'ug_id', 'u_enabled', 'u_is_superadmin', 'u_is_owner', 'u_is_store_manager', 'u_is_admin', 'synched', 'sync_date', 'deleted_at', 'remember_token', 'created_at', 'updated_at' ];
+    protected $fillable     = [ 'u_fname', 'u_mname', 'u_lname', 'u_username', 'u_email', 'u_mobile', 'password', 'ug_id', 'u_enabled', 'u_is_superadmin', 'u_is_cashier', 'u_is_admin', 'synched', 'sync_date', 'deleted_at', 'remember_token', 'created_at', 'updated_at' ];
     protected $dates        = [ 'sync_date', 'created_at', 'updated_at' ];    
 
     public function getAuthIdentifier(){

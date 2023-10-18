@@ -34,10 +34,23 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $msg            = $request->session()->pull('session_msg', '');
-        $products = Product::all(); // Fetch your products data (adjust the query as needed)
-        $sales    = OrderDetail::all();
 
-        return view('pages.dashboard', [ 'products' => $products, 'sales' => $sales , 'msg' => $msg]);
+        $now = now(); // Get the current date and time
+
+        $currentMonth = $now->month;
+        $currentYear = $now->year;
+        
+        
+
+        $products       = Product::all(); // Fetch your products data (adjust the query as needed)
+        $sales          = OrderDetail::all();
+
+        $monthlysales   = OrderDetail::whereMonth('created_at', $currentMonth)
+        ->whereYear('created_at', $currentYear)
+        ->get();
+
+
+        return view('pages.dashboard', [ 'products' => $products, 'sales' => $sales , 'msg' => $msg, 'monthlysales' => $monthlysales, 'month' => $currentMonth]);
     }
 
     /**

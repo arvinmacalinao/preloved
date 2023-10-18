@@ -37,13 +37,12 @@ class UserValidation extends FormRequest
 			'u_email'                   => 'bail|nullable|email|unique:users,u_email'.($id > 0 ? ','.$item->id.',id' : ''),
 			'u_mobile'                  => 'bail|nullable|string|max:255',
 			'u_username'                => 'bail|nullable|string|max:255|unique:users,u_username'.($id > 0 ? ','.$item->id.',id' : ''),
-			'password'                => ($id > 0 ? 'bail|sometimes|confirmed|max:255' : 'bail|required|max:255'),
-			'u_password_confirmation'   => 'bail|required_with:password|same:password|max:255',
+			'password'                	=> ($id > 0 ? 'bail|sometimes|confirmed|max:255' : 'bail|required|max:255'),
+			'password_confirmation'   => 'bail|required_with:password|same:password|max:255',
             'u_enabled'                 => 'bail|nullable|integer',	
 			'u_is_superadmin'           => 'bail|nullable|integer',
 			'u_is_admin'                => 'bail|nullable|integer',
-			'u_is_owner'                => 'bail|nullable|integer',
-			'u_is_store_manager'        => 'bail|nullable|integer',
+			'u_is_cashier'              => 'bail|nullable|integer',
         ];
     }
 
@@ -63,12 +62,11 @@ class UserValidation extends FormRequest
 				'u_mobile'              => 'Mobile',
 				'u_username'            => 'Username',
 				'u_password'            => 'Password',
-				'u_password'            => 'Password Confirmation',
+				'password_confirmation' => 'Password Confirmation',
 				'u_enabled'             => 'Account Status',
 				'u_is_superadmin'       => 'Is Superadmin',
-				'u_is_admin'            => 'Is Admin',
-				'u_is_owner'            => 'Is Product Owner',
-				'u_is_store_manager'    => 'Is Store Manager',
+				'u_is_admin'            => 'Is Store Admin',
+				'u_is_cashier'          => 'Is Store Cashier',
 			];
 		}
 }

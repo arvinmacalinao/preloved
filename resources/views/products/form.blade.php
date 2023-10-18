@@ -1,6 +1,6 @@
 @extends('layouts.app', [
     'class' => '',
-    'elementActive' => 'products'
+    'elementActive' => 'product'
 ])
 
 @section('content')
@@ -67,22 +67,15 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-2">
-                                        <label class="form-label fw-bold" for="prod_owner_id">Product Owner</label>
-                                        <select class="form-control @error('prod_owner_id') is-invalid @enderror" name="prod_owner_id" id="prod_owner_id">                                
-                                            @foreach($owners as $owner)
-                                                <option value="{{ $owner->prod_owner_id }}" {{ old('prod_owner_id', $p->prod_owner_id) == $owner->prod_owner_id ? 'selected' : '' }}>{{ $owner->prod_owner_name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="invalid-feedback">@error('prod_owner_id') {{ $errors->first('prod_owner_id') }} @enderror</div>
+                                        <label class="form-label fw-bold" for="prod_owner_name">Product Owner</label>
+                                        <input autocomplete="off" type="text" class="form-control prodOwner" name="prod_owner_name" id="prod_owner_name" value="{{ old('prod_owner_name', $p->owner->prod_owner_name) }}">
                                     </div>
                                 </div>
                             </div>
                             <br>
-                            @if(Str::contains(Request::url(), 'create') || Str::contains(Request::url(), 'edit'))
                             <div class="mb-2 text-end">
                                 <input class="btn btn-primary" type="submit" name="form-submit" id="form-submit" value="Save">
                             </div>
-                            @endif
                         </form>
                     </div>
                 </div>
@@ -91,4 +84,25 @@
     </div>
 </div>
 @endsection
+@push('scripts')
+<script>
+    $(document).ready(function() {
+    var path = "{{ route('autocompleteOwner') }}";
+    let data = [];
 
+    $('input.prodOwner').typeahead({
+        source: function(query, process) {
+            if (query.length) {
+                return $.get(path, { query: query }, function(retrievedData) {
+                    data = retrievedData;
+                    const transformedData = data.map(item => `${item.prod_owner_name}`);
+                    return process(transformedData);
+                });
+            } else {
+                process([]);
+            }
+        },
+    });
+});
+</script>    
+@endpush

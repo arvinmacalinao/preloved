@@ -46,42 +46,16 @@ class ProductController extends Controller
         $search         = $request->get('search') == NULL ? '' : $request->get('search');
         $startDate      = $request->get('date_start') == NULL ? '' : $request->get('date_start');
         $endDate        = $request->get('date_end') == NULL ? '' : $request->get('date_end');
-
+        $qtype          = $request->get('prod_type_id') == NULL ? '' : $request->get('prod_type_id');
         
-        // Get the logged-in user's ID
-        $user_id = Auth::id();
-    
-        // Check if the logged-in user is a superadmin
-        $isSuperadmin = User::where('id', $user_id)->orWhere('u_is_superadmin', 1)->orWhere('u_is_store_manager')->exists();
-    
-        if ($isSuperadmin) {
-            // If the user is a superadmin, retrieve all Product records
-            $extract = Product::search($search)->dateRange($startDate, $endDate)->get();
-            $rows = Product::search($search)->dateRange($startDate, $endDate)->paginate(20);
-
-            $request->session()->put('extract', $extract);
-        } else {
-            // If the user is not a superadmin, check if they are an owner
-            $user = User::where('id', $user_id)->where('u_is_owner', 1)->first();
         
-            if ($user) {
-                $extract = Product::whereHas('owner', function ($innerQuery) use ($user_id) {
-                    $innerQuery->where('u_id', $user_id);
-                })->search($search)->dateRange($startDate, $endDate)->paginate(20);
-                
-                // If the user is an owner, retrieve Product records where the product belongs to them
-                $rows = Product::whereHas('owner', function ($innerQuery) use ($user_id) {
-                        $innerQuery->where('u_id', $user_id);
-                    })->search($search)->dateRange($startDate, $endDate)->paginate(20);
+        // ProductType
+        $types          =   ProductType::get();
 
-                $request->session()->put('extract', $extract);
-            } else {
-                // If the user is neither a superadmin nor an owner, restrict access
-                $rows = collect(); // Empty collection to ensure no records are displayed
-            }
-        }
+        $extract        = Product::search($search)->ProdType($qtype)->dateRange($startDate, $endDate)->get();
+        $rows           = Product::search($search)->ProdType($qtype)->dateRange($startDate, $endDate)->paginate(20);
        
-        return view('products.index', compact('rows', 'search', 'msg', 'extract', 'startDate', 'endDate'));
+        return view('products.index', compact('rows', 'search', 'msg', 'extract', 'startDate', 'endDate', 'types', 'qtype'));
     }
 
     /**
@@ -107,9 +81,10 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ProductValidation $request, $id)
+    public function store(Request $request, $id)
     {
-        $input      = $request->validated();
+        // ProductValidation
+        // $input      = $request->validated();
 
         if($id == 0) {
             $min = 1000000000;
@@ -183,6 +158,20 @@ class ProductController extends Controller
             $request['prod_barcode'] = $barcode;
 
             $request->request->add(['created_by' => Auth::id()]);
+            
+            $get_prod_owner_name = $request->get('prod_owner_name');
+            
+            $productOwner = ProductOwner::where('prod_owner_name', $get_prod_owner_name)->first();
+
+            if(!$productOwner){
+                $newProductOwner = ProductOwner::create([
+                    'prod_owner_name' => $request->request->get('prod_owner_name'),
+                    'created_by' => Auth::id(),
+                ]);
+                $request->merge(['prod_owner_id' => $newProductOwner->prod_owner_id]);
+            }else{
+                $request->merge(['prod_owner_id' => $productOwner->prod_owner_id]);
+            }
             $p = Product::create($request->all());
             
         } else {
@@ -270,6 +259,21 @@ class ProductController extends Controller
                 'updated_at' => Carbon::now(), 
                 'updated_by' => Auth::id()
             ]);
+
+            $get_prod_owner_name = $request->get('prod_owner_name');
+            
+            $productOwner = ProductOwner::where('prod_owner_name', $get_prod_owner_name)->first();
+
+            if(!$productOwner){
+                $newProductOwner = ProductOwner::create([
+                    'prod_owner_name' => $request->request->get('prod_owner_name'),
+                    'created_by' => Auth::id(),
+                ]);
+                $request->merge(['prod_owner_id' => $newProductOwner->prod_owner_id]);
+            }else{
+                $request->merge(['prod_owner_id' => $productOwner->prod_owner_id]);
+            }
+            
             $p->update($request->all());
 
             $request->session()->put('session_msg', 'Record updated.');
@@ -359,6 +363,22 @@ class ProductController extends Controller
         $extract = $request->session()->get('extract');
         
         return $excel->download(new ProductsExport($extract), $filename);
+    }
+
+    public function autocompleteOwner(Request $request)
+    {
+        try {
+            $query = $request->input('prod_owner_id');
+        
+            $owners = ProductOwner::select('prod_owner_id', 'prod_owner_name')
+                ->where('prod_owner_name', 'like', $query . '%')
+                ->limit(10)
+                ->get();
+        
+            return response()->json($owners);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     }
 
 }

@@ -16,7 +16,7 @@ class CreateProductOwnersTable extends Migration
         Schema::create('product_owners', function (Blueprint $table) {
             $table->id('prod_owner_id');
             $table->string('prod_owner_name'); // Name of the product owner or seller
-            $table->string('prod_owner_email')->unique(); // Email address of the product owner (make it unique)
+            $table->string('prod_owner_email')->nullable(); // Email address of the product owner (make it unique)
             $table->string('prod_owner_phone')->nullable();
             $table->timestamp('created_at');
             $table->timestamp('updated_at')->nullable();

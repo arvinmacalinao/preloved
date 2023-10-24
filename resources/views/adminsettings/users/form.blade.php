@@ -134,14 +134,14 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    @if(auth()->user()->u_is_superadmin)
-                                    <div class="form-group ml-2">
-                                        <div class="checkbox">
-                                            <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_superadmin" id="u_is_superadmin"{{ (old('u_is_superadmin', optional($user)->u_is_superadmin) == 1) ? ' checked="checked"' : ''}}>
-                                            <label class="form-check-label fw-bold" for="u_is_superadmin">Is Superadmin</label>
-                                        </div>
-                                    </div>
-                                    @endif
+                                        @if(auth()->user()->u_is_superadmin == 1)
+                                            <div class="form-group ml-2">
+                                                <div class="checkbox">
+                                                    <input class="mr-3 mt-1 text-center" type="checkbox" value="1" name="u_is_superadmin" id="u_is_superadmin"{{ (old('u_is_superadmin', optional($user)->u_is_superadmin) == 1) ? ' checked="checked"' : '' }}>
+                                                    <label class="form-check-label fw-bold" for="u_is_superadmin">Is Superadmin</label>
+                                                </div>
+                                            </div>
+                                        @endif
                                 </div>
                             </div>
                             <br>

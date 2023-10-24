@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent">
+<nav class="navbar navbar-expand-lg navbar-absolute fixed-top navbar-transparent ">
     <div class="container-fluid">
         <div class="navbar-wrapper">
             <div class="navbar-toggle">
@@ -28,7 +28,7 @@
                 </div>
             </form>
             <ul class="navbar-nav">
-                {{-- <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link btn-magnify" href="#pablo">
                         <i class="nc-icon nc-layout-11"></i>
                         <p>
@@ -37,19 +37,33 @@
                     </a>
                 </li>
                 <li class="nav-item btn-rotate dropdown">
-                    <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="nc-icon nc-bell-55"></i>
                         <p>
-                            <span class="d-lg-none d-md-block">{{ __('Some Actions') }}</span>
+                            <span class="d-lg-none d-md-block">{{ __('Notifications') }}</span>
                         </p>
+                        <!-- Display the total number of unsold and sold notifications -->
+                        @php
+                            $totalUnsoldNotifications = $notifications->where('not_type_id', 1)->where('read_at', null)->count();
+                            $totalSoldNotifications = $notifications->where('not_type_id', 2)->where('read_at', null)->count();
+                            $allnotification = $notifications->count();
+                            $totalNotifications = $totalUnsoldNotifications + $totalSoldNotifications;
+                        @endphp
+                        @if($totalNotifications >= 1)
+                            <span class="badge badge-danger">{{ $totalNotifications }}</span>
+                        @endif
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                        <a class="dropdown-item" href="#">{{ __('Action') }}</a>
-                        <a class="dropdown-item" href="#">{{ __('Another action') }}</a>
-                        <a class="dropdown-item" href="#">{{ __('Something else here') }}</a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationsDropdown">
+                        <a class="dropdown-item" href="{{ route('notification.list.unsold') }}">{{ __('Unsold Notifications') }} ({{ $totalUnsoldNotifications }})</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ route('notification.list.sold') }}">{{ __('Sold Notifications') }} ({{ $totalSoldNotifications }})</a>
+                        <div class="dropdown-divider"></div>
+                        {{-- {{ route('notifications.index') }} --}}
+                        <a class="dropdown-item" href="{{ route('notification.list') }}">
+                            {{ __('View Notifications') }} ({{ $allnotification }})
+                        </a>
                     </div>
-                </li> --}}
+                </li>                
                 <li class="nav-item btn-rotate dropdown">
                     <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="nc-icon nc-settings-gear-65"></i>
@@ -64,7 +78,6 @@
                         </div>
                     </div>
                 </li>
-                
             </ul>
         </div>
     </div>

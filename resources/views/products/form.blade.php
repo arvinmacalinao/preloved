@@ -68,7 +68,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-2">
                                         <label class="form-label fw-bold" for="prod_owner_name">Product Owner</label>
-                                        <input autocomplete="off" type="text" class="form-control prodOwner" name="prod_owner_name" id="prod_owner_name" value="{{ old('prod_owner_name', $p->owner->prod_owner_name) }}">
+                                        <input autocomplete="off" type="text" class="form-control prodOwner" name="prod_owner_name" id="prod_owner_name" value="{{ old('prod_owner_name', $p->owner->prod_owner_name ?? '') }}">
                                     </div>
                                 </div>
                             </div>

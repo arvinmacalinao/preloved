@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\UserGroup;
+use App\Models\Notification;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -57,5 +58,15 @@ class User extends Authenticatable
 
 	public function usergroup() {
         return $this->belongsTo(UserGroup::class, 'ug_id', 'ug_id');
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('u_is_admin', 1);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }

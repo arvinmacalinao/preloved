@@ -38,6 +38,16 @@ class OrderDetail extends Model
             }
     }
 
+    public function scopepaymentMode($query, $qpayment) {
+        if ($qpayment) {
+            $query->WhereHas('transaction', function($transaction) use($qpayment) {
+                $transaction->WhereHas('mode', function($mode) use($qpayment) {
+                    $mode->where('payment_mode_id', $qpayment);
+                    });
+                });
+            }
+    }
+
     public function scopeDateRange($query, $startDate, $endDate)
     {
         if ($startDate) {

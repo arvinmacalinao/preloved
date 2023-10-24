@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\PaymentMode;
 use App\Models\ProductType;
 use App\Exports\SalesExport;
 use Illuminate\Http\Request;
@@ -42,13 +43,15 @@ class SalesController extends Controller
         $startDate      = $request->get('date_start') == NULL ? '' : $request->get('date_start');
         $endDate        = $request->get('date_end') == NULL ? '' : $request->get('date_end');
         $qtype          = $request->get('prod_type_id') == NULL ? '' : $request->get('prod_type_id');
+        $qpayment       = $request->get('payment_mode_id') == NULL ? '' : $request->get('payment_mode_id');
 
         $types          =   ProductType::get();
+        $payments       =   PaymentMode::get();
    
-        $extract = OrderDetail::search($search)->prodType($qtype)->dateRange($startDate, $endDate)->get();
-        $rows    = OrderDetail::search($search)->prodType($qtype)->dateRange($startDate, $endDate)->paginate(20);
+        $extract = OrderDetail::search($search)->prodType($qtype)->paymentMode($qpayment)->dateRange($startDate, $endDate)->get();
+        $rows    = OrderDetail::search($search)->prodType($qtype)->paymentMode($qpayment)->dateRange($startDate, $endDate)->paginate(20);
     
-        return view('sales.index', compact('rows', 'search', 'msg' , 'extract', 'endDate', 'startDate', 'types', 'qtype'));
+        return view('sales.index', compact('rows', 'search', 'msg' , 'extract', 'endDate', 'startDate', 'types', 'qtype', 'payments', 'qpayment'));
     }
 
     /**

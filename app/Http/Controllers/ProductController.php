@@ -47,15 +47,17 @@ class ProductController extends Controller
         $startDate      = $request->get('date_start') == NULL ? '' : $request->get('date_start');
         $endDate        = $request->get('date_end') == NULL ? '' : $request->get('date_end');
         $qtype          = $request->get('prod_type_id') == NULL ? '' : $request->get('prod_type_id');
-        
+        $qowner         = $request->get('prod_owner_id') == NULL ? '' : $request->get('prod_owner_id');
         
         // ProductType
         $types          =   ProductType::get();
+        $owners         =   ProductOwner::get();
 
-        $extract        = Product::search($search)->ProdType($qtype)->dateRange($startDate, $endDate)->get();
-        $rows           = Product::search($search)->ProdType($qtype)->dateRange($startDate, $endDate)->paginate(20);
+
+        $extract        = Product::search($search)->ProdType($qtype)->ProdOwner($qowner)->dateRange($startDate, $endDate)->get();
+        $rows           = Product::search($search)->ProdType($qtype)->ProdOwner($qowner)->dateRange($startDate, $endDate)->paginate(20);
        
-        return view('products.index', compact('rows', 'search', 'msg', 'extract', 'startDate', 'endDate', 'types', 'qtype'));
+        return view('products.index', compact('rows', 'search', 'msg', 'extract', 'startDate', 'endDate', 'types', 'qtype', 'qowner', 'owners'));
     }
 
     /**
@@ -101,16 +103,18 @@ class ProductController extends Controller
             $barcodeGenerator->setStorPath(public_path('storage/generate/images')); // Set the storage path
         
             // Generate the barcode image
-            $barcodeImage = $barcodeGenerator->getBarcodePNGPath($barcode, 'C128',2,60, array(0,0,0), true);
+            $barcodeImage = $barcodeGenerator->getBarcodePNGPath($barcode, 'C128',2,100, array(0,0,0), true);
             
             $imagePath = public_path('storage/generate/images/' . $barcode . "c128.png");
 
             // Load the generated barcode image using Intervention Image
             $barcodeImage = Image::make($imagePath);
-                
+            $height = 100;
+            $weight = 210;
+            $barcodeImage->resize($weight, $height);
             // Get the dimensions of the barcode image
-            $barcodeWidth = 280;
-            $barcodeHeight = 100;
+            $barcodeWidth = 250;
+            $barcodeHeight = 250;
                 
             // Create a new canvas with a white background
             $image = Image::canvas($barcodeWidth, $barcodeHeight, '#FFFFFF');
@@ -119,40 +123,74 @@ class ProductController extends Controller
             $image->insert($barcodeImage, 'bottom', 0, 5);
             
             // Sample custom text lines
-            $line2 = 'Price: Php' . number_format($price, 2);
             $line1 = 'Product: ' . $description;
-
+            $line2 = 'Price: Php' . number_format($price, 2);
+           
             // Define custom text settings
-            $customText = $line1 . "\n" . $line2; // Format the price with 2 decimal places
-            $fontPath = public_path('generate/font/ProximaNovaA-Thin.ttf');
-            $fontSize = 5;
+            $fontPath = public_path('font/1.ttf');
+            $fontSize = 15;
             $fontColor = '#000000'; // Black color
 
             // Define the position to place the custom text
             $xPosition = 10; // Adjust as needed
-            $yPosition = 15; // Adjust as needed
-            $yPosition2 = 25; // Adjust as needed
+            $yPosition = 80; // Adjust as needed
+            $yPosition2 = 130; // Adjust as needed
 
-            // Add custom text to the image with explicit line breaks
-            $image->text($line1, $xPosition, $yPosition, function($font) use ( $fontSize, $fontColor) {
-       
-                $font->size($fontSize);
-                $font->color($fontColor);
-            });
+            // Define the width of the bounding box
+            $boxWidth = 180; // Adjust as needed
+
+            // Split the text into lines to fit within the bounding box
+            $wrappedText = wordwrap($line1, 20, "\n", true); // Adjust the line width (20 characters) as needed
+
+            // Split the wrapped text into an array of lines
+            $textLines = explode("\n", $wrappedText);
+
+            // Add custom text to the image with text wrapping
+            $currentY = $yPosition; // Initialize the Y-position
+            foreach ($textLines as $textLine) {
+                $image->text($textLine, $xPosition, $currentY, function($font) use ($fontPath, $fontSize, $fontColor) {
+                    $font->file($fontPath);
+                    $font->size($fontSize);
+                    $font->color($fontColor);
+                });
+            
+                // Increment the Y-position for the next line
+                $currentY += $fontSize + 2; // Adjust the vertical spacing as needed
+            }
 
             // Adjust the Y-coordinate for the second line
             // Add some vertical spacing between lines (adjust as needed)
 
-            $image->text($line2, $xPosition, $yPosition2, function($font) use ( $fontSize, $fontColor) {
-          
+            $image->text($line2, $xPosition, $yPosition2, function($font) use ($fontPath, $fontSize, $fontColor) {
+                $font->file($fontPath);
                 $font->size($fontSize);
                 $font->color($fontColor);
             });
-        
+
             // Save the modified image
             $generatedFilename = $barcode . '.png'; // Use the barcode value as the filename
             $image->save(public_path('storage/generate/barcode/' . $generatedFilename));
-        
+
+            // Incorporate the code to add a logo below
+            $logoPath = public_path('img/luxeford_logo_barcode.png'); // Update the path to your logo
+
+            // Load the existing barcode image with the generated barcode and text
+            $existingBarcodeImage = Image::make(public_path('storage/generate/barcode/' . $generatedFilename));
+
+            // Load the logo/image
+            $logo = Image::make($logoPath);
+
+            // Calculate the position for the top center
+            $logoX = ($existingBarcodeImage->width() - $logo->width()) / 2; // Center the logo horizontally
+            $logoY = 10; // Position the logo 10 pixels from the top
+
+            // Insert the logo/image onto the existing barcode image
+            $existingBarcodeImage->insert($logo, 'top-left', (int)$logoX, (int)$logoY);
+
+
+            // Save the modified barcode image with the added logo
+            $existingBarcodeImage->save(public_path('storage/generate/barcode/' . $generatedFilename));
+            
             // Store the barcode value and filename in your database
             $request['barcode_image'] = $generatedFilename;
             $request['prod_barcode'] = $barcode;
@@ -205,10 +243,12 @@ class ProductController extends Controller
             // ... (Your code for generating and saving the new image)
             // Load the generated barcode image using Intervention Image
             $barcodeImage = Image::make($previousImagePath);
-                
+            $height = 100;
+            $weight = 210;
+            $barcodeImage->resize($weight, $height);
             // Get the dimensions of the barcode image
-            $barcodeWidth = 280;
-            $barcodeHeight = 100;
+            $barcodeWidth = 250;
+            $barcodeHeight = 250;
                 
             // Create a new canvas with a white background
             $image = Image::canvas($barcodeWidth, $barcodeHeight, '#FFFFFF');
@@ -220,29 +260,42 @@ class ProductController extends Controller
             $line2 = 'Price: Php' . number_format($price, 2);
             $line1 = 'Product: ' . $description;
 
-            // Define custom text settings
-            $customText = $line1 . "\n" . $line2; // Format the price with 2 decimal places
-            $fontPath = public_path('generate/font/ProximaNovaA-Thin.ttf');
-            $fontSize = 5;
+            $fontPath = public_path('font/1.ttf');
+            $fontSize = 15;
             $fontColor = '#000000'; // Black color
 
             // Define the position to place the custom text
             $xPosition = 10; // Adjust as needed
-            $yPosition = 15; // Adjust as needed
-            $yPosition2 = 25; // Adjust as needed
+            $yPosition = 80; // Adjust as needed
+            $yPosition2 = 130; // Adjust as needed
+            
+            // Define the width of the bounding box
+            $boxWidth = 180; // Adjust as needed
 
-            // Add custom text to the image with explicit line breaks
-            $image->text($line1, $xPosition, $yPosition, function($font) use ( $fontSize, $fontColor) {
-       
-                $font->size($fontSize);
-                $font->color($fontColor);
-            });
+            // Split the text into lines to fit within the bounding box
+            $wrappedText = wordwrap($line1, 20, "\n", true); // Adjust the line width (20 characters) as needed
+
+            // Split the wrapped text into an array of lines
+            $textLines = explode("\n", $wrappedText);
+
+            // Add custom text to the image with text wrapping
+            $currentY = $yPosition; // Initialize the Y-position
+            foreach ($textLines as $textLine) {
+                $image->text($textLine, $xPosition, $currentY, function($font) use ($fontPath, $fontSize, $fontColor) {
+                    $font->file($fontPath);
+                    $font->size($fontSize);
+                    $font->color($fontColor);
+                });
+            
+                // Increment the Y-position for the next line
+                $currentY += $fontSize + 2; // Adjust the vertical spacing as needed
+            }
 
             // Adjust the Y-coordinate for the second line
             // Add some vertical spacing between lines (adjust as needed)
 
-            $image->text($line2, $xPosition, $yPosition2, function($font) use ( $fontSize, $fontColor) {
-          
+            $image->text($line2, $xPosition, $yPosition2, function($font) use ($fontPath, $fontSize, $fontColor) {
+                $font->file($fontPath);
                 $font->size($fontSize);
                 $font->color($fontColor);
             });
@@ -250,6 +303,30 @@ class ProductController extends Controller
             // Save the modified image
             $generatedFilename = $barcode . '.png'; // Use the barcode value as the filename
             $image->save(public_path('storage/generate/barcode/' . $generatedFilename));
+
+            // Save the modified image
+            $generatedFilename = $barcode . '.png'; // Use the barcode value as the filename
+            $image->save(public_path('storage/generate/barcode/' . $generatedFilename));
+
+            // Incorporate the code to add a logo below
+            $logoPath = public_path('img/luxeford_logo_barcode.png'); // Update the path to your logo
+
+            // Load the existing barcode image with the generated barcode and text
+            $existingBarcodeImage = Image::make(public_path('storage/generate/barcode/' . $generatedFilename));
+
+            // Load the logo/image
+            $logo = Image::make($logoPath);
+
+            // Calculate the position for the top center
+            $logoX = ($existingBarcodeImage->width() - $logo->width()) / 2; // Center the logo horizontally
+            $logoY = 10; // Position the logo 10 pixels from the top
+
+            // Insert the logo/image onto the existing barcode image
+            $existingBarcodeImage->insert($logo, 'top-left', (int)$logoX, (int)$logoY);
+
+
+            // Save the modified barcode image with the added logo
+            $existingBarcodeImage->save(public_path('storage/generate/barcode/' . $generatedFilename));
         
             // Store the barcode value and filename in your database
             $request['barcode_image'] = $generatedFilename;
@@ -317,8 +394,7 @@ class ProductController extends Controller
         
         $p          = Product::where('prod_id', $id)->first();
         if(!$p) {
-            $request->session()->put('session_msg', 'Record not found!
-            ');
+            $request->session()->put('session_msg', 'Record not found!');
             return redirect(route('product.lists'));
         }
         return view('products.form', compact('p', 'id', 'msg', 'owners', 'types'));

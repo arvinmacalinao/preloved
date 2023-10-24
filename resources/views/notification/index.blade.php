@@ -1,6 +1,6 @@
 @extends('layouts.app', [
     'class' => '',
-    'elementActive' => 'sales'
+    'elementActive' => 'notification'
 ])
 @section('content')
     <div class="content">
@@ -23,9 +23,9 @@
                                 <h3 class="mb-0">{{ $data['page'] }}</h3>
                             </div>
                             <div class="col-4">
-                                <div class="pull-right">
-                                    <a class="btn btn-success btn-sm" id="" href="{{ route('sales.download.excel') }}" name="download-list-btn" class="print-download-btn pr" title="Download List"><span class="fa fa-floppy-o"></span> Download</a>
-                                </div>
+                                {{-- <div class="pull-right">
+                                    <a class="btn btn-success btn-sm" id="" href="" name="download-list-btn" class="print-download-btn pr" title="Download List"><span class="fa fa-floppy-o"></span> Download</a>
+                                </div> --}}
                             </div>
                         </div>
                         <!-- Search engine section -->
@@ -56,26 +56,14 @@
                                 </div>
                                 <div class="col-md-2">
                                     <div class="mb-2 dd">
-                                        <label class="form-label fw-bold text-light" for="prod_type_id">Product Type</label>
-                                        <select class="form-control @error('prod_type_id') is-invalid @enderror" name="prod_type_id" id="prod_type_id">
+                                        <label class="form-label fw-bold text-light" for="not_type_id">Notification Type</label>
+                                        <select class="form-control @error('not_type_id') is-invalid @enderror" name="not_type_id" id="not_type_id">
                                             <option value="">All</option>
                                             @foreach($types as $type)
-                                                <option value="{{ $type->prod_type_id }}" >{{ $type->prod_type_name }}</option>
+                                                <option value="{{ $type->not_type_id }}" >{{ $type->not_type_name }}</option>
                                             @endforeach
                                         </select>
-                                        <div class="invalid-feedback">@error('prod_type_id') {{ $errors->first('prod_type_id') }} @enderror</div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="mb-2 dd">
-                                        <label class="form-label fw-bold text-light" for="payment_mode_id">Payment Method</label>
-                                        <select class="form-control @error('payment_mode_id') is-invalid @enderror" name="payment_mode_id" id="payment_mode_id">
-                                            <option value="">All</option>
-                                            @foreach($payments as $payment)
-                                                <option value="{{ $payment->payment_mode_id }}" >{{ $payment->payment_mode_name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="invalid-feedback">@error('payment_mode_id') {{ $errors->first('payment_mode_id') }} @enderror</div>
+                                        <div class="invalid-feedback">@error('not_type_id') {{ $errors->first('not_type_id') }} @enderror</div>
                                     </div>
                                 </div>
                                 <div class="col-auto">
@@ -101,76 +89,60 @@
                             </div>
                         <!-- End of pagination section -->
                         <hr>
+                        <form action="{{ route('mark-selected-as-read') }}" method="POST">
+                        @csrf
+                        @method('POST')
                         <div class="table-responsive">
                             <table class="table table-flush">
                                 <thead class="thead-light">
                                     <tr>
+                                        <th scope="col" width="1%">
+                                            <input type="checkbox" id="mark-all-checkbox">
+                                        </th>
+                                        <th scope="col"><button type="submit" class="btn btn-secondary btn-sm mark-as-read-button">Mark as Read</button></th>
                                         <th scope="col">#</th>
-                                        <th scope="col" width="10%">Date of Sale</th>
-                                        <th scope="col" width="10%">Customer</th>
-                                        <th scope="col" width="20%">Product Sold</th>
-                                        <th class="text-right" width="10%" scope="col">Product Type</th>
-                                        <th class="text-right" scope="col">Payment Method</th>
-                                        <th class="text-right" scope="col">Quantity Sold</th>
-                                        <th class="text-right" scope="col">Total Amount</th>
+                                        <th scope="col" width="10%">Notification Date</th>
+                                        <th scope="col" width="30%">Message</th>
+                                        <th scope="col" width="10%">Notification Type</th>
+                                        <th width="30%" scope="col">Product</th>
+                                        <th scope="15">Product Owner</th>
                                     </tr>
                                 </thead>
                                 <?php
                                     $ctr = $rows->firstItem();
-                                 ?>
+                                ?>
                                 <tbody>
                                 @foreach ($rows as $row)
-                                <tr>
-                                    <td> {{ $ctr++ }} </td>
-                                    <td>{{ date('m-d-y', strtotime($row->transaction->ot_transact_date)) }}</td>
-                                    <td>{{ $row->order->order_customer_name }}</td>
-                                    <td>{{ $row->product->prod_description }}</td>
-                                    <td>{{ $row->product->type->prod_type_name }}</td>
-                                    <td class="text-right">{{ $row->transaction->mode->payment_mode_name }}</td>
-                                    <td class="text-right">{{ $row->order_quantity }}</td>
-                                    <td class="text-right"> &#8369; {{ number_format($row->order_amount_total, 2) }} </td>
-                                </tr>
+                                    <tr class="{{ $row->read_at ? 'read-notification' : 'unread-notification' }}">
+                                        <td>
+                                            <input type="checkbox" class="notification-checkbox" name="notification_id[]" value="{{ $row->not_id }}">
+                                        </td>
+                                        <td>
+                                        @if (!$row->read_at)
+                                            <a href="{{ route('mark-single-as-read', ['notification' => $row]) }}" class="btn btn-secondary btn-sm mark-as-read-button">Mark as Read</a>
+                                        @endif
+                                        </td>
+                                        <td>{{ $ctr++ }}</td>
+                                        <td>{{ date('m-d-y', strtotime($row->created_at)) }}</td>
+                                        <td>{{ $row->not_message }}</td>
+                                        <td>{{ $row->type->not_type_name }}</td>
+                                        <td><a href="{{ route('product.view', ['id' => $row->prod_id]) }}" title="Edit">{{ $row->product->prod_description }}</a></td>
+                                        <td>{{ $row->product->owner->prod_owner_name }}</td>
+                                    </tr>
                                 @endforeach
                                 </tbody>
                             </table>
+                        </form>
                             <hr>
                             @if ($rows->isEmpty())
-				                <h3 class="bg-light text-center p-4">No Items Found</h3>
-			                @endif
-                        </div>
+                                <h3 class="bg-light text-center p-4">No Items Found</h3>
+                            @endif
+                        </div>                                        
                         <!-- Pagination section -->
                         <div class="text-right">
                             @include('subviews.pagination', ['rows' => $rows])
                         </div>
                         <!-- End of pagination section -->
-                    </div>
-                    <div class="card-footer">
-                        <div style="" class="row">
-                            <div class="col-md-6">
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card bg-light mb-3" style="max-width: 18rem;">
-                                    <div class="card-header bg-info text-light text-center">
-                                        Total Products Sold
-                                    </div>
-                                    <div class="card-body">
-                                      <h5 class="card-title text-right">{{ $extract->sum('order_quantity') }}</h5>
-                                      
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card bg-light mb-3" style="max-width: 18rem;">
-                                    <div class="card-header bg-primary text-light text-center">
-                                        Total Amount Sold
-                                    </div>
-                                    <div class="card-body">
-                                      <h5 class="card-title text-right">&#8369;{{ number_format($extract->sum('order_amount_total'), 2) }}</h5>
-                                     
-                                    </div>
-                                  </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -181,6 +153,11 @@
 @push('scripts')
     <script>
         $(document).ready(function(){
+            $('#mark-all-checkbox').click(function () {
+            const isChecked = $(this).prop('checked');
+            $('.notification-checkbox').prop('checked', isChecked);
+            });
+
             $('.date_start').datepicker({
                 format: 'yyyy-mm-dd', // Set the desired date format
                 todayHighlight:'TRUE',

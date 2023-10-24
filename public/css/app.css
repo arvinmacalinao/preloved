@@ -48,3 +48,14 @@
 .select.form-control {
   padding: 0;
 }
+
+.unread-notification {
+  background-color: #ffdddd; /* Change the background color for unread notifications */
+  font-weight: bold; /* Make text bold for unread notifications */
+  /* Add other styles as needed */
+}
+
+.read-notification {
+  background-color: #dddddd; /* Change the background color for read notifications */
+  /* Add other styles as needed */
+}

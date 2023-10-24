@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use View;
 use Exception;
+use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\OrderDetail;
 use App\Models\PaymentMode;
+use App\Models\Notification;
 use App\Models\ProductOwner;
 use Illuminate\Http\Request;
 use App\Models\OrderTransaction;
@@ -110,6 +112,19 @@ class OrderController extends Controller
             
                     $product->prod_quantity = $newQuantity;
                     $product->save();
+
+                    $admins = User::admins()->get();
+                        foreach ($admins as $admin) {
+                            $notification = new Notification([
+                                'not_message' => 'Product ' . $product->prod_description . ' has been sold.',
+                                'not_type_id' => 2,
+                                'prod_id' => $prodId,
+                                'admin_id' => $admin->id,
+                                'type' => 'Product Sold', // You can set the notification type here
+                            ]);
+                    
+                            $notification->save();
+                    }
                 }
             } else {
                 // Handle the case where the input data is missing or not an array.

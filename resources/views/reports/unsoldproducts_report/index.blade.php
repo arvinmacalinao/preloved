@@ -1,6 +1,6 @@
 @extends('layouts.app', [
     'class' => '',
-    'elementActive' => 'salesreport'
+    'elementActive' => 'unsoldproductsreport'
 ])
 @section('content')
     <div class="content">
@@ -24,7 +24,8 @@
                             </div>
                             <div class="col-4">
                                 <div class="pull-right">
-                                    <a class="btn btn-info btn-sm" id="" href="{{ route('sales.report.pdf') }}" name="download-list-btn" class="print-download-btn pr" title="Download List"><span class="fa fa-floppy-o"></span> Print</a>
+                                    {{-- {{ route('products.report.pdf') }} --}}
+                                    <a class="btn btn-info btn-sm" id="" href="" name="download-list-btn" class="print-download-btn pr" title="Download List"><span class="fa fa-floppy-o"></span> Print</a>
                                 </div>
                             </div>
                         </div>
@@ -60,10 +61,22 @@
                                     <select class="form-control @error('prod_type_id') is-invalid @enderror" name="prod_type_id" id="prod_type_id">
                                         <option value="">All</option>
                                         @foreach($types as $type)
-                                            <option value="{{ $type->prod_type_id }}" >{{ $type->prod_type_name }}</option>
+                                            <option value="{{ $type->prod_type_id }}" {{ old('prod_type_id') == $type->prod_type_id ? 'selected' : '' }}>{{ $type->prod_type_name }}</option>
                                         @endforeach
                                     </select>
                                     <div class="invalid-feedback">@error('prod_type_id') {{ $errors->first('prod_type_id') }} @enderror</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-2 dd">
+                                    <label class="form-label fw-bold text-light" for="prod_owner_id">Product Owner</label>
+                                    <select class="form-control @error('prod_owner_id') is-invalid @enderror" name="prod_owner_id" id="prod_owner_id">
+                                        <option value="">All</option>
+                                        @foreach($owners as $owner)
+                                            <option value="{{ $owner->prod_owner_id }}" {{ old('prod_owner_id') == $owner->prod_owner_id ? 'selected' : '' }}>{{ $owner->prod_owner_name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="invalid-feedback">@error('prod_owner_id') {{ $errors->first('prod_owner_id') }} @enderror</div>
                                 </div>
                             </div>
                             <div class="col-auto">
@@ -89,32 +102,63 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col" width="10%">Date of Sale</th>
-                                        <th scope="col" width="10%">Customer</th>
-                                        <th scope="col" width="20%">Product Sold</th>
-                                        <th class="text-right" width="10%" scope="col">Product Type</th>
-                                        <th class="text-right" scope="col">Payment Method</th>
-                                        <th class="text-right" scope="col">Quantity Sold</th>
-                                        <th class="text-right" scope="col">Total Amount</th>
+                                        <th scope="col" width="20%">Description</th>
+                                        <th class="text-center" scope="col" width="20%">Barcode/Serial No.</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Owner</th>
+                                        <th class="text-right" scope="col">Days Unsold</th>
+                                        <th class="text-right" scope="col">Quantity Remaining</th>
+                                        <th class="text-right" scope="col" width="15%">Price</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                 @foreach ($rows as $row)
                                 <tr>
                                     <td> {{ $loop->iteration }} </td>
-                                    <td>{{ date('m-d-y', strtotime($row->transaction->ot_transact_date)) }}</td>
-                                    <td>{{ $row->order->order_customer_name }}</td>
-                                    <td>{{ $row->product->prod_description }}</td>
-                                    <td>{{ $row->product->type->prod_type_name }}</td>
-                                    <td class="text-right">{{ $row->transaction->mode->payment_mode_name }}</td>
-                                    <td class="text-right">{{ $row->order_quantity }}</td>
-                                    <td class="text-right"> &#8369; {{ number_format($row->order_amount_total, 2) }} </td>
+                                    <td><a href="{{ route('product.view', ['id' => $row->prod_id]) }}" title="Edit">{{ $row->prod_description }}</a></td>
+                                    <td class="text-center">
+                                        @if($row->barcode_image_url)
+                                        <a href="{{ $row->barcode_image_url }}" target="_blank" title="View">
+                                            <img src="{{ asset('storage/generate/images/' . $row->prod_barcode . 'c128.png') }}" width="200px">
+                                        </a>
+                                        @else
+                                            Image not found.
+                                        @endif
+                                    </td>
+                                    <td>{{ $row->type->prod_type_name }}</td>
+                                    <td>
+                                        <a href="{{ route('product.owner.view', ['id' => $row->prod_owner_id]) }}" title="View">
+                                            {{ $row->owner->prod_owner_name }}
+                                        </a>
+                                    </td>
+                                    <td class="text-right @if(now()->diffInDays($row->created_at) >= 30) text-danger @endif">
+                                        @if(now()->diffInDays($row->created_at) == 0)
+                                            {{ now()->diffInHours($row->created_at) }} hours
+                                        @else
+                                            {{ now()->diffInDays($row->created_at) }} days
+                                        @endif
+                                    </td>
+                                    <td class="text-right">{{ $row->prod_quantity }}</td>
+                                    <td class="text-right">&#8369; {{ number_format($row->prod_price, 2) }}</td>
                                 </tr>
                                 @endforeach
-                                <tr style="border-">
-                                    <td colspan="6" class="text-right"><strong>Total:</strong></td>
-                                    <td class="text-right"><strong>{{ $extract->sum('order_quantity') }}</strong></td>
-                                    <td class="text-right"><strong>{{ number_format($extract->sum('order_amount_total'), 2) }}</strong></td>
+                                <tr style="border">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td colspan="" class="text-right"><strong>Total:</strong></td>
+                                    <td class="text-right"><strong>{{ $extract->sum('prod_quantity') }}</strong></td>
+                                    @php
+                                    $totalPrice = 0; // Initialize the total price to 0
+                                            foreach ($rows as $row) {
+                                                $quantity = $row->prod_quantity;
+                                                $price = $row->prod_price;
+                                                $totalPrice += $quantity * $price; // Calculate and accumulate the total price
+                                            }
+                                    @endphp
+                                    <td class="text-right"><strong>&#8369;{{ number_format($totalPrice, 2) }}</strong></td>
                                 </tr>
                                 </tbody>
                             </table>

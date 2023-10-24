@@ -27,7 +27,7 @@
                     <p>{{ __('Products') }}</p>
                 </a>
             </li>
-            <li class="{{ $elementActive == 'report' || $elementActive == 'salesreport' || $elementActive == 'productsreport' ? 'active' : '' }}">
+            <li class="{{ $elementActive == 'report' || $elementActive == 'salesreport' || $elementActive == 'productsreport' || $elementActive == 'unsoldproductsreport' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples">
                     <i class="fa fa-files-o"></i>
                     <p>
@@ -35,7 +35,7 @@
                         <b class="caret"></b>
                     </p>
                 </a>
-                <div class="collapse" id="laravelExamples">
+                <div class="collapse {{ $elementActive == 'salesreport' || $elementActive == 'productsreport' || $elementActive == 'unsoldproductsreport' ? 'show' : '' }}" id="laravelExamples">
                     <ul class="nav">
                         <li class="{{ $elementActive == 'salesreport' ? 'active' : '' }}">
                             <a href="{{ route('sales.report') }}">
@@ -44,15 +44,21 @@
                             </a>
                         </li>
                         <li class="{{ $elementActive == 'productsreport' ? 'active' : '' }}">
-                            <a href="">
+                            <a href="{{ route('products.report') }}">
                                 <span class="sidebar-mini-icon">{{ __('PR') }}</span>
                                 <span class="sidebar-normal">{{ __(' Product Report ') }}</span>
+                            </a>
+                        </li>
+                        <li class="{{ $elementActive == 'unsoldproductsreport' ? 'active' : '' }}">
+                            <a href="{{ route('unsoldproducts.report') }}">
+                                <span class="sidebar-mini-icon">{{ __('PR') }}</span>
+                                <span class="sidebar-normal">{{ __(' Unsold Product Report ') }}</span>
                             </a>
                         </li>
                     </ul>
                 </div>
             </li>
-            <li class="{{ $elementActive == 'users' || $elementActive == 'profile' ? 'active' : '' }}">
+            <li class="{{ $elementActive == 'users' || $elementActive == 'profile' || $elementActive == 'usergroup' || $elementActive == 'product-type' || $elementActive == 'product-owner' ? 'active' : '' }}">
                 <a data-toggle="collapse" aria-expanded="false" href="#laravelExamples2">
                     <i class="fa fa-cogs"><img src=""></i>
                     <p>

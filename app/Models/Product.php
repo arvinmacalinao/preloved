@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\OrderDetail;
+use App\Models\Notification;
 use App\Models\ProductOwner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -50,6 +51,12 @@ class Product extends Model
     public function scopeProdType($query, $qtype) {
         if ($qtype) {
             $query->where('prod_type_id', $qtype);
+        }
+    }
+
+    public function scopeProdOwner($query, $qowner) {
+        if ($qowner) {
+            $query->where('prod_owner_id', $qowner);
         }
     }
 

@@ -12,7 +12,10 @@ use App\Http\Controllers\UsergroupController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProductTypeController;
 use App\Http\Controllers\SalesReportController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductOwnerController;
+use App\Http\Controllers\ProductsReportController;
+use App\Http\Controllers\UnsoldProductReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +72,23 @@ Route::get('sales/export/', [SalesController::class, 'export'])->name('sales.dow
 
 /* Sales Report */
 Route::any('sales_report', [SalesReportController::class, 'index'])->name('sales.report');
-Route::get('sales_report/export_pdf/', [SalesReportController::class, 'exportPDF'])->name('sales.report.pdf');
+Route::get('sales_report/export_pdf/', [SalesReportController::class, 'generatePDF'])->name('sales.report.pdf');
+
+/* Product Report */
+Route::any('products_report', [ProductsReportController::class, 'index'])->name('products.report');
+Route::get('products_report/export_pdf/', [ProductsReportController::class, 'generatePDF'])->name('products.report.pdf');
+
+/* Unsold Report */
+Route::any('unsoldproducts_report', [UnsoldProductReportController::class, 'index'])->name('unsoldproducts.report');
+Route::get('unsoldproducts_report/export_pdf/', [UnsoldProductReportController::class, 'generatePDF'])->name('unsoldproducts.report.pdf');
+
+/* Notification */
+Route::any('notifications', [NotificationController::class, 'index'])->name('notification.list');
+Route::any('notifications/unsold', [NotificationController::class, 'unsold'])->name('notification.list.unsold');
+Route::any('notifications/sold', [NotificationController::class, 'sold'])->name('notification.list.sold');
+Route::get('mark-single-as-read/{notification}', [NotificationController::class, 'markSingleAsRead'])->name('mark-single-as-read');
+Route::post('mark-selected-as-read', [NotificationController::class, 'markAsRead'])->name('mark-selected-as-read');
+
 
 });
 
@@ -120,6 +139,4 @@ Route::post('product-owner/store/{id}', [ProductOwnerController::class, 'store']
 Route::get('product-owner/{id}/view', [ProductOwnerController::class, 'view'])->name('product.owner.view');
 Route::get('product-owner/edit/{id}', [ProductOwnerController::class, 'edit'])->name('product.owner.edit');
 Route::get('product-owner/delete/{id}', [ProductOwnerController::class, 'destroy'])->name('product.owner.delete');
-
-
 });

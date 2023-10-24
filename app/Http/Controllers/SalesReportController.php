@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use View;
+use Barryvdh\DomPDF\PDF;
 use App\Models\OrderDetail;
 use App\Models\ProductType;
 use Illuminate\Http\Request;
@@ -39,6 +40,30 @@ class SalesReportController extends Controller
         $extract = OrderDetail::search($search)->prodType($qtype)->dateRange($startDate, $endDate)->get();
         $rows    = OrderDetail::search($search)->prodType($qtype)->dateRange($startDate, $endDate)->orderBy('created_at', 'asc')->get();
 
+        session(['pdf_data' => compact('extract', 'rows')]);
+
         return view('reports.sale_report.index', compact('msg', 'rows', 'extract', 'qtype', 'types', 'startDate', 'endDate', 'search'));
+    }
+
+    public function generatePDF()
+    {   
+        $date = now();
+        // Retrieve data from the session
+        $pdfData = session('pdf_data');
+        
+        $pdf = app()->make('dompdf.wrapper');
+
+        if (!$pdfData) {
+            // Handle the case where data is not found in the session
+            abort(404);
+        }
+    
+        $extract = $pdfData['extract'];
+        $rows = $pdfData['rows'];
+    
+        // Generate the PDF
+        $pdf->loadView('pdf.sales_report', ['extract' => $extract, 'rows' => $rows]);
+    
+        return $pdf->stream();
     }
 }

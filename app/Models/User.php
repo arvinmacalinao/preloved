@@ -69,4 +69,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    // call this to get the column where to send the email  
+    public function routeNotificationForMail()
+    {
+        return $this->u_email;
+    }
 }

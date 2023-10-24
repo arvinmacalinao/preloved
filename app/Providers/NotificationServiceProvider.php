@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Notification;
 use Illuminate\Support\ServiceProvider;
+use App\Notifications\UnsoldProductNotification;
 
 class NotificationServiceProvider extends ServiceProvider
 {
@@ -52,12 +53,7 @@ class NotificationServiceProvider extends ServiceProvider
                     ]);
                     $notification->save();
 
-                    // Send an email to the admin
-                    Mail::send('emails.unsold_product_notification', ['product' => $product], function ($message) use ($admin) {
-                    $message
-                        ->to($admin->u_email)
-                        ->subject('Unsold Product Notification');
-                    });
+                    $admin->notify(new UnsoldProductNotification($product));
                 }
             }
         }

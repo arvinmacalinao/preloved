@@ -118,7 +118,7 @@ Route::get('product/export/', [ProductController::class, 'export'])->name('produ
 Route::get('/autocompleteOwner', [ProductController::class, 'autocompleteOwner'])->name('autocompleteOwner');
 Route::get('download-product-excel', [ProductController::class, 'downloadProductExcel'])->name('download.product.template');
 
-/* Order */ 
+/* Order  */ 
 Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
 Route::post('order/store/{id}', [OrderController::class, 'store'])->name('order.store');
 Route::get('/get-product-details-by-barcode', [OrderController::class, 'getProductDetailsByBarcode'])->name('get-product-details-by-barcode');

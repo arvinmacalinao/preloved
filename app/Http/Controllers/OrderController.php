@@ -295,7 +295,6 @@ class OrderController extends Controller
         // Use the query to fetch product suggestions (e.g., from your database)
         $suggestions = Product::where('prod_barcode', 'like', $query . '%')
             ->orWhere('prod_description', 'like', '%' . $query . '%')
-            ->limit(10) // Limit the number of suggestions
             ->get();
         
         if ($suggestions) {
@@ -313,7 +312,6 @@ class OrderController extends Controller
             $datas = Product::select('prod_barcode', 'prod_description')
                 ->where('prod_barcode', 'like', $query . '%')
                 ->orWhere('prod_description', 'like', '%' . $query . '%')
-                ->limit(10)
                 ->get();
     
             return response()->json($datas);

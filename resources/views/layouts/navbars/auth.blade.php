@@ -1,11 +1,12 @@
 <div class="sidebar" data-color="white" data-active-color="danger">
     <div class="logo text-center">
-        <a href=""><img  src="{{ asset('img') }}/luxeford_logo.png" width="190" height="47"></a>
+        <a href="{{ route('dashboard', 'dashboard') }}"><img  src="{{ asset('img') }}/luxeford_logo.png" width="190" height="47"></a>
     </div>
     <div class="sidebar-wrapper">
         <ul class="nav">
             <li class="{{ $elementActive == 'dashboard' ? 'active' : '' }}">
                 <a href="{{ route('dashboard', 'dashboard') }}">
+                    <i class="nc-icon nc-grid"></i>
                     <p>{{ __('Dashboard') }}</p>
                 </a>
             </li>

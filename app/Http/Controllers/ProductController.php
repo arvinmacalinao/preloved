@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
 use App\Exports\ProductsExport;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\ProductTemplateExport;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProductValidation;
 use Intervention\Image\ImageManagerStatic as Image;
@@ -53,10 +54,11 @@ class ProductController extends Controller
         $types          =   ProductType::get();
         $owners         =   ProductOwner::get();
 
+        $extract        = Product::search($search)->ProdType($qtype)->ProdOwner($qowner)->dateRange($startDate, $endDate)->orderby('created_at', 'desc')->get();
+        $rows           = Product::search($search)->ProdType($qtype)->ProdOwner($qowner)->dateRange($startDate, $endDate)->orderby('created_at', 'desc')->paginate(20);
+        
+        $request->session()->put('extract', $extract);
 
-        $extract        = Product::search($search)->ProdType($qtype)->ProdOwner($qowner)->dateRange($startDate, $endDate)->get();
-        $rows           = Product::search($search)->ProdType($qtype)->ProdOwner($qowner)->dateRange($startDate, $endDate)->paginate(20);
-       
         return view('products.index', compact('rows', 'search', 'msg', 'extract', 'startDate', 'endDate', 'types', 'qtype', 'qowner', 'owners'));
     }
 
@@ -115,16 +117,19 @@ class ProductController extends Controller
             // Get the dimensions of the barcode image
             $barcodeWidth = 250;
             $barcodeHeight = 250;
+
+            // Use image interpolation
+            $barcodeImage->interlace(false);
                 
             // Create a new canvas with a white background
-            $image = Image::canvas($barcodeWidth, $barcodeHeight, '#FFFFFF');
+            $image = Image::canvas($barcodeWidth, $barcodeHeight, null);
                     
             // Insert the barcode image at the custom position (bottom with margin)
             $image->insert($barcodeImage, 'bottom', 0, 5);
             
             // Sample custom text lines
             $line1 = 'Product: ' . $description;
-            $line2 = 'Price: Php' . number_format($price, 2);
+            $line2 = 'Price: Php ' . number_format($price, 2);
            
             // Define custom text settings
             $fontPath = public_path('font/1.ttf');
@@ -140,7 +145,7 @@ class ProductController extends Controller
             $boxWidth = 180; // Adjust as needed
 
             // Split the text into lines to fit within the bounding box
-            $wrappedText = wordwrap($line1, 20, "\n", true); // Adjust the line width (20 characters) as needed
+            $wrappedText = wordwrap($line1, 30, "\n", true); // Adjust the line width (20 characters) as needed
 
             // Split the wrapped text into an array of lines
             $textLines = explode("\n", $wrappedText);
@@ -224,7 +229,7 @@ class ProductController extends Controller
                 return redirect(route('product.lists'));
             }
 
-            $previousImagePath = public_path('storage/generate/images/' . $barcode . "c128.png");
+            $previousImagePath = storage_path('app/public/generate/images/' . $barcode . "c128.png");
 
             $oldImageFilename = $p->barcode_image;
 
@@ -233,14 +238,13 @@ class ProductController extends Controller
             $renamedImageFilename = $timestamp . '_' . $oldImageFilename;
             
             // Get the path to the previous image
-            $previousBarcodePath = public_path('storage/generate/barcode/' . $oldImageFilename);
+            $previousBarcodePath = storage_path('app/public/generate/barcode/' . $oldImageFilename);
             
             // Rename the existing image file
             if (file_exists($previousBarcodePath)) {
-                rename($previousBarcodePath, public_path('storage/generate/barcode/' . $renamedImageFilename));
+                rename($previousBarcodePath, storage_path('app/public/generate/barcode/' . $renamedImageFilename));
             }
         
-            // ... (Your code for generating and saving the new image)
             // Load the generated barcode image using Intervention Image
             $barcodeImage = Image::make($previousImagePath);
             $height = 100;
@@ -249,15 +253,18 @@ class ProductController extends Controller
             // Get the dimensions of the barcode image
             $barcodeWidth = 250;
             $barcodeHeight = 250;
+
+            // Use image interpolation
+            $barcodeImage->interlace(false);
                 
             // Create a new canvas with a white background
-            $image = Image::canvas($barcodeWidth, $barcodeHeight, '#FFFFFF');
+            $image = Image::canvas($barcodeWidth, $barcodeHeight, null);
                     
             // Insert the barcode image at the custom position (bottom with margin)
             $image->insert($barcodeImage, 'bottom', 0, 5);
             
             // Sample custom text lines
-            $line2 = 'Price: Php' . number_format($price, 2);
+            $line2 = 'Price: Php ' . number_format($price, 2);
             $line1 = 'Product: ' . $description;
 
             $fontPath = public_path('font/1.ttf');
@@ -273,7 +280,7 @@ class ProductController extends Controller
             $boxWidth = 180; // Adjust as needed
 
             // Split the text into lines to fit within the bounding box
-            $wrappedText = wordwrap($line1, 20, "\n", true); // Adjust the line width (20 characters) as needed
+            $wrappedText = wordwrap($line1, 29, "\n", true); // Adjust the line width (20 characters) as needed
 
             // Split the wrapped text into an array of lines
             $textLines = explode("\n", $wrappedText);
@@ -302,17 +309,13 @@ class ProductController extends Controller
         
             // Save the modified image
             $generatedFilename = $barcode . '.png'; // Use the barcode value as the filename
-            $image->save(public_path('storage/generate/barcode/' . $generatedFilename));
-
-            // Save the modified image
-            $generatedFilename = $barcode . '.png'; // Use the barcode value as the filename
-            $image->save(public_path('storage/generate/barcode/' . $generatedFilename));
+            $image->save(storage_path('app/public/generate/barcode/' . $generatedFilename));
 
             // Incorporate the code to add a logo below
             $logoPath = public_path('img/luxeford_logo_barcode.png'); // Update the path to your logo
 
             // Load the existing barcode image with the generated barcode and text
-            $existingBarcodeImage = Image::make(public_path('storage/generate/barcode/' . $generatedFilename));
+            $existingBarcodeImage = Image::make(storage_path('app/public/generate/barcode/' . $generatedFilename));
 
             // Load the logo/image
             $logo = Image::make($logoPath);
@@ -326,7 +329,7 @@ class ProductController extends Controller
 
 
             // Save the modified barcode image with the added logo
-            $existingBarcodeImage->save(public_path('storage/generate/barcode/' . $generatedFilename));
+            $existingBarcodeImage->save(storage_path('app/public/generate/barcode/' . $generatedFilename));
         
             // Store the barcode value and filename in your database
             $request['barcode_image'] = $generatedFilename;
@@ -457,4 +460,11 @@ class ProductController extends Controller
         }
     }
 
+    public function downloadProductExcel(Excel $excel)
+    {   
+        $now      = Carbon::now()->format('m-d-y');
+        $filename = "products-".$now.".xlsx";
+
+        return $excel->download(new ProductTemplateExport, $filename);
+    }
 }

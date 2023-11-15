@@ -75,9 +75,9 @@
                 <div class="card-body">
                     @php
                     $totalPrice = 0; // Initialize the total price to 0
-                        foreach ($rows as $row) {
-                            $quantity = $row->prod_quantity;
-                            $price = $row->prod_price;
+                        foreach ($extract as $extracts) {
+                            $quantity = $extracts->prod_quantity;
+                            $price = $extracts->prod_price;
                             $totalPrice += $quantity * $price; // Calculate and accumulate the total price
                         }
                     @endphp
@@ -101,6 +101,7 @@
                             <h3 class="mb-0">{{ $data['page'] }}</h3>
                         </div>
                         <div class="col-4 text-right">
+                            {{-- <a class="btn btn-success btn-sm" id="" href="{{ route('download.product.template') }}" name="download-list-btn" class="print-download-btn pr" title="Download Template"><span class="fa fa-floppy-o"></span> Download Template</a> --}}
                             <a class="btn btn-success btn-sm" id="" href="{{ route('products.download.excel') }}" name="download-list-btn" class="print-download-btn pr" title="Download List"><span class="fa fa-floppy-o"></span> Download</a>
                             <a href="{{ route('product.create') }}" title="Add {{ $data['page'] }}" class="btn btn-sm btn-primary">Add {{ $data['page'] }}</a>
                         </div>
@@ -207,6 +208,7 @@
                                 <td class="text-center">
                                     @if($row->barcode_image_url)
                                     <a href="{{ $row->barcode_image_url }}" target="_blank" title="View">
+                                    <img id="barcodeImage" src="{{ $row->barcode_image_url }}" style="display: none;">
                                         <img src="{{ asset('storage/generate/images/' . $row->prod_barcode . 'c128.png') }}" width="200px">
                                     </a>
                                     @else
@@ -231,7 +233,10 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                    <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', ['id' => $row->prod_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
+                                    <a class="btn btn-success btn-sm row-print-btn" data-image="{{ $row->barcode_image_url }}" title="Print">
+                                        <i class="fa fa-print"></i>
+                                    </a>
+                                    <a class="btn btn-primary btn-sm row-open-btn" href="{{ route('product.view', [ 'id' => $row->prod_id]) }}" title="View"><i class="fa fa-folder-open"></i></a>
                                     <a class="btn btn-success btn-sm row-edit-btn" href="{{ route('product.edit', ['id' => $row->prod_id]) }}" title="Edit"><i class="fa fa-pencil"></i></a>
                                     <a class="btn btn-info btn-sm row-edit-btn" href="{{ route('download.product.barcode', ['filename' => $row->barcode_image]) }}" title="Download"><i class="fa fa-download"></i></a>
                                     <a class="btn btn-danger btn-sm  row-delete-btn" href="{{ route('product.delete', ['id' => $row->prod_id]) }}" data-msg="Delete this item?" data-text="#{{ $ctr }}" title="Delete"><i class="fa fa-trash-o"></i></a>
@@ -256,6 +261,36 @@
 
 @push('scripts')
  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const printButtons = document.querySelectorAll('.row-print-btn');
+
+        printButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const imageUrl = button.getAttribute('data-image');
+                const image = new Image();
+                image.src = imageUrl;
+
+                // Wait for the image to load
+                image.onload = function() {
+                    // Create a new temporary window
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.open();
+                    printWindow.document.write(
+                        `<html><body><img src="${image.src}"></body></html>`
+                    );
+                    printWindow.document.close();
+
+                    // Trigger the print dialog in the temporary window
+                    printWindow.onload = function() {
+                        printWindow.print();
+                        printWindow.close(); // Close the temporary window after printing
+                    }
+                };
+            });
+        });
+    });
+    
     $(document).ready(function(){
             $('.date_start').datepicker({
                 format: 'yyyy-mm-dd', // Set the desired date format
@@ -269,5 +304,7 @@
                 autoclose: true,
             });
         });
+
+        
  </script>
 @endpush

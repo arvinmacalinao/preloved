@@ -118,7 +118,8 @@
                                     <td class="text-center">
                                         @if($row->barcode_image_url)
                                         <a href="{{ $row->barcode_image_url }}" target="_blank" title="View">
-                                            <img src="{{ asset('storage/generate/images/' . $row->prod_barcode . 'c128.png') }}" width="200px">
+                                            {{-- <img src="{{ asset('storage/generate/images/' . $row->prod_barcode . 'c128.png') }}" width="200px"> --}}
+                                            {{ $row->prod_barcode }}
                                         </a>
                                         @else
                                             Image not found.

@@ -36,9 +36,10 @@ class NotificationController extends Controller
 
         $types          =   NotificationType::get();
 
-        $rows           =   Notification::where('admin_id', Auth::id())->search($search)->dateRange($startDate, $endDate)->orderBy('read_at', 'asc')->paginate(20);
+        $rows           =   Notification::where('admin_id', Auth::id())->NotType($qtype)->search($search)->dateRange($startDate, $endDate)->orderBy('read_at', 'asc')->paginate(20);
     
-        return view('notification.index', compact('rows', 'search', 'msg', 'endDate', 'startDate', 'types', 'qtype',));
+        return view('notification.index', compact('rows', 'search', 'msg', 'endDate', 'startDate', 'types', 'qtype',))
+        ->with('not_type_id', $request->input('not_type_id'));;
     }
 
     public function unsold(Request $request)

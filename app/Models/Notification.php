@@ -50,4 +50,10 @@ class Notification extends Model
     
         return $query;
     }
+
+    public function scopeNotType($query, $qtype) {
+        if ($qtype) {
+            $query->where('not_type_id', $qtype);
+        }
+    }
 }

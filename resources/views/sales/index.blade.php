@@ -96,7 +96,7 @@
                     </div>
                     <div class="card-body ">   
                         <!-- Pagination section -->
-                            <div class="text-right">
+                            <div class="">
                                 @include('subviews.pagination', ['rows' => $rows])
                             </div>
                         <!-- End of pagination section -->
@@ -139,7 +139,7 @@
 			                @endif
                         </div>
                         <!-- Pagination section -->
-                        <div class="text-right">
+                        <div class="">
                             @include('subviews.pagination', ['rows' => $rows])
                         </div>
                         <!-- End of pagination section -->

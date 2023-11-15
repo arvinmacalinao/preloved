@@ -166,7 +166,7 @@
         
         $('input.prodBarcode').typeahead({
             source: function(query, process) {
-        if (query.length >= 2 && query.length < 10) { // Check if the query length is at least 3 characters
+        if (query.length) { // Check if the query length is at least 3 characters
             return $.get(path, { query: query }, function(retrievedData) {
                 data = retrievedData;
                 const transformedData = data.map(item => `${item.prod_barcode} - ${item.prod_description}`);

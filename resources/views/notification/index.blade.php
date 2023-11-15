@@ -57,15 +57,17 @@
                                 <div class="col-md-2">
                                     <div class="mb-2 dd">
                                         <label class="form-label fw-bold text-light" for="not_type_id">Notification Type</label>
-                                        <select class="form-control @error('not_type_id') is-invalid @enderror" name="not_type_id" id="not_type_id">
-                                            <option value="">All</option>
+                                        <select class="form-control" name="not_type_id" id="not_type_id">
+                                            <option value=""{{ old('not_type_id', $not_type_id) === null ? ' selected' : '' }}>All</option>
                                             @foreach($types as $type)
-                                                <option value="{{ $type->not_type_id }}" >{{ $type->not_type_name }}</option>
+                                                <option value="{{ $type->not_type_id }}"{{ old('not_type_id', $not_type_id) == $type->not_type_id ? ' selected' : '' }}>
+                                                    {{ $type->not_type_name }}
+                                                </option>
                                             @endforeach
                                         </select>
                                         <div class="invalid-feedback">@error('not_type_id') {{ $errors->first('not_type_id') }} @enderror</div>
                                     </div>
-                                </div>
+                                </div>                                
                                 <div class="col-auto">
                                     <label class="text-light mr-2" for="date_end">Search</label>
                                     <div class="input-group">

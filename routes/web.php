@@ -19,7 +19,7 @@ use App\Http\Controllers\UnsoldProductReportController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Web Routes    
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
@@ -116,6 +116,7 @@ Route::get('product/delete/{id}', [ProductController::class, 'destroy'])->name('
 Route::get('product/download_barcode/{filename}', [ProductController::class, 'download'])->name('download.product.barcode');
 Route::get('product/export/', [ProductController::class, 'export'])->name('products.download.excel');
 Route::get('/autocompleteOwner', [ProductController::class, 'autocompleteOwner'])->name('autocompleteOwner');
+Route::get('download-product-excel', [ProductController::class, 'downloadProductExcel'])->name('download.product.template');
 
 /* Order */ 
 Route::any('orders', [OrderController::class, 'index'])->name('order.lists');
